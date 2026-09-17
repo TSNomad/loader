@@ -1,0 +1,29 @@
+{
+  "name": "@tsnomad/loader",
+  "version": "0.1.0",
+  "description": "Bootstrapper that runs initializers against a container and an event strategy, the TypeScript counterpart to PHPNomad's loader package",
+  "type": "module",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/tsnomad/loader.git" },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./bootstrapper": { "types": "./dist/Bootstrapper.d.ts", "default": "./dist/Bootstrapper.js" },
+    "./base-initializer": { "types": "./dist/BaseInitializer.d.ts", "default": "./dist/BaseInitializer.js" },
+    "./interfaces": { "types": "./dist/interfaces.d.ts", "default": "./dist/interfaces.js" }
+  },
+  "files": ["dist", "src", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@tsnomad/di-container": "^0.1.0",
+    "@tsnomad/event": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
