@@ -1,0 +1,1466 @@
+
+> @tsnomad/loader@0.1.0 pretest
+> npm run build
+
+
+> @tsnomad/loader@0.1.0 build
+> tsc -p tsconfig.json
+
+
+> @tsnomad/loader@0.1.0 test
+> node --test
+
+✖ initializers given as separate arguments load in order, as in PHPNomad (2.22955ms)
+✖ initializers given as one array, the 0.1 form, load in order (0.421966ms)
+✖ bootstrap(), the 0.1 entry point, runs the same steps as load() (0.345757ms)
+✔ a bootstrapper with no initializers loads (0.186682ms)
+✖ a bootstrapper is Loadable, so it can be an initializer of another bootstrapper (0.316957ms)
+✖ the same initializers can load into two containers (0.280164ms)
+✔ getContainer returns the container the bootstrapper was given (0.16153ms)
+✔ BaseInitializer keeps the container and returns itself, as PHPNomad setContainer does (0.139955ms)
+✖ each type guard answers true when the method is there and false when it is not (0.319228ms)
+✖ a pair binds the concrete to its abstract (3.634398ms)
+✖ a pair with a list of abstracts binds them all to one shared instance (0.433406ms)
+✖ a pair binds to a typed token, and the concrete is autowired through its inject list (0.225666ms)
+✖ the 0.1 record form binds each token to its factory, cached as 0.1 did (0.177124ms)
+✖ every pair of every initializer is bound, in list order (1.1273ms)
+✔ an empty list binds nothing and loads (0.259297ms)
+✖ a duplicate binding fails the load with a LoaderException naming the second initializer (0.370813ms)
+✖ a pair with no abstract fails the load with the container error as the cause (0.160797ms)
+✖ an answer that is neither a list of pairs nor a plain record fails the load and binds nothing (0.24493ms)
+✖ each controller registers one route whose getter resolves the controller from the container (2.469888ms)
+✖ a getter does not build its controller until the strategy calls it (0.353299ms)
+✖ a controller may need a binding a later initializer makes (0.351752ms)
+✖ routes register in list order across initializers, with one strategy resolve (1.200409ms)
+✖ controllers with no REST strategy bound fail the load with a LoaderException and the container error (0.535052ms)
+✔ an empty list resolves no REST strategy, so it loads with none bound (0.342106ms)
+✖ a malformed answer fails the load with a LoaderException and registers nothing from it (0.37899ms)
+✔ LoaderException carries the initializer, its position and the cause, and its message reads in one line (1.313798ms)
+✖ a DiException thrown from load() becomes a LoaderException with it as the cause (1.044157ms)
+✖ every DiException subclass is wrapped, and the cause is the same object (0.299265ms)
+✖ an error that is not a DiException passes through unchanged, from every method an initializer has (0.364135ms)
+✖ a rejected promise from load() that is not a DiException passes through unchanged (0.227953ms)
+✖ the load stops at the first failing initializer, and later initializers never start (0.29891ms)
+✖ a plain object initializer is named anonymous initializer, with its position (0.136163ms)
+✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged (0.357729ms)
+✖ an async attach on the event strategy is awaited too (0.231035ms)
+✖ a bare action string binds the event class to the action with no transformer (1.675816ms)
+✖ an action object passes its own transformer (0.235002ms)
+✖ a list of actions binds each one, strings and objects, in order, across every pair (0.817492ms)
+✖ the strategy is resolved once for an initializer with several bindings (0.174261ms)
+✔ an empty list resolves no strategy, so it loads with none bound (0.219259ms)
+✖ bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error (0.259109ms)
+✖ a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy (0.33112ms)
+✖ pairs and 0.1 entries in one list each reach their own strategy, in list order (0.216445ms)
+✖ an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged (0.189344ms)
+✖ a malformed answer fails the load with a LoaderException and binds nothing from it (0.27769ms)
+✔ test/fixtures.ts (71.651602ms)
+✖ an initializer that binds the event strategy in its record form serves its own listeners and later ones (1.192749ms)
+✖ a 0.1 event with only an instance getId reaches a listener the loader attached by id (1.859036ms)
+✖ a plain function listener hears its event (3.215611ms)
+✖ a list of listeners runs in list order, for each event id (0.554866ms)
+✖ a handler class is resolved from the container and its handle receives the event (0.400753ms)
+✖ a handler class is resolved when the event fires, so it may need a binding a later initializer makes (0.388714ms)
+✖ the handler is not built during load, only when its event fires (0.433918ms)
+✖ broadcast waits for an async handler's handle to settle (0.414395ms)
+✖ a handler that cannot be resolved fails the broadcast, not the load (0.521506ms)
+✖ an error from handle reaches the broadcast unchanged (0.366734ms)
+✖ a function with a prototype but no handle method is a plain listener, called with the event (0.453117ms)
+✖ a plain function is attached itself, by event id, at the default priority (0.65032ms)
+✖ the strategy bound under the 0.1 string token is the one the loader uses (0.49498ms)
+✖ the 0.1 bootstrap option reads the event strategy by the token it names (0.31631ms)
+✖ listeners with no event strategy bound fail the load with a LoaderException and the container error (0.255322ms)
+✔ an empty record resolves no event strategy, so it loads with none bound (0.182966ms)
+✖ a malformed answer fails the load with a LoaderException and attaches nothing from it (0.420612ms)
+✖ a false condition skips every step after it, and the container was set before the question (2.064233ms)
+✖ a condition that resolves false skips every step after it (0.340391ms)
+✖ a false condition skips only its own initializer, and the next one loads in full (0.291983ms)
+✖ a true condition, sync or async, runs every step (0.262653ms)
+✖ the condition is asked after setContainer and before the class definitions (0.307259ms)
+✖ an answer that is not a boolean fails the load with a LoaderException and runs no later step (0.433607ms)
+✖ a condition that throws stops the load with its own error, unchanged (0.274935ms)
+✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load (1.851067ms)
+✖ each initializer finishes every step before the next initializer starts (0.365952ms)
+✖ a later initializer is not bound yet while an earlier one loads (0.241395ms)
+✖ an initializer with only some methods runs only those steps, in the same order (0.246776ms)
+✖ an async load finishes before the next initializer starts (0.270403ms)
+✖ load resolves only after the last initializer has loaded (0.187702ms)
+✖ each initializer receives the bootstrapper container itself (0.222387ms)
+✔ test/loader-type-safety.ts (77.573499ms)
+✖ a handler class is attached for its task class, and running the task calls its handle with the task (1.736869ms)
+✖ the handler is resolved through the container when the task runs, not during load (0.932433ms)
+✖ a handler may need a binding a later initializer makes (0.329784ms)
+✖ a list of handlers attaches each one, in order, across every pair, with one strategy resolve (0.246643ms)
+✖ the function the strategy runs settles only after the handler's handle settles (0.224872ms)
+✖ a failing handler rejects the function the strategy runs, so the strategy sees the failure (0.148441ms)
+✖ a handler that cannot be resolved rejects the function the strategy runs (0.137058ms)
+✖ handlers with no task strategy bound fail the load with a LoaderException and the container error (0.316707ms)
+✔ an empty list resolves no task strategy, so it loads with none bound (0.227374ms)
+✖ a malformed answer fails the load with a LoaderException and attaches nothing from it (0.344937ms)
+ℹ tests 87
+ℹ suites 0
+ℹ pass 11
+ℹ fail 76
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 140.684473
+
+✖ failing tests:
+
+test at test/bootstrapper-surface.test.ts:26:1
+✖ initializers given as separate arguments load in order, as in PHPNomad (2.22955ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'A.load',
+  -   'B.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/bootstrapper-surface.test.ts:30:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'A.load', 'B.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/bootstrapper-surface.test.ts:33:1
+✖ initializers given as one array, the 0.1 form, load in order (0.421966ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'A.load',
+  -   'B.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/bootstrapper-surface.test.ts:37:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'A.load', 'B.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/bootstrapper-surface.test.ts:40:1
+✖ bootstrap(), the 0.1 entry point, runs the same steps as load() (0.345757ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'A.setContainer',
+  -   'A.getClassDefinitions',
+  -   'A.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/bootstrapper-surface.test.ts:47:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'A.setContainer', 'A.getClassDefinitions', 'A.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/bootstrapper-surface.test.ts:56:1
+✖ a bootstrapper is Loadable, so it can be an initializer of another bootstrapper (0.316957ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'Before.load',
+  -   'Inner.load',
+  -   'After.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/bootstrapper-surface.test.ts:61:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'Before.load', 'Inner.load', 'After.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/bootstrapper-surface.test.ts:64:1
+✖ the same initializers can load into two containers (0.280164ms)
+  Error [BindingNotFoundError]: Token 'Value' is not bound. Available: none
+      at Container.resolve (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/node_modules/@tsnomad/di-container/dist/Container.js:190:35)
+      at Container.get (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/node_modules/@tsnomad/di-container/dist/Container.js:168:28)
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/bootstrapper-surface.test.ts:71:29)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    token: 'Value',
+    availableTokens: []
+  }
+
+test at test/bootstrapper-surface.test.ts:92:1
+✖ each type guard answers true when the method is there and false when it is not (0.319228ms)
+  AssertionError [ERR_ASSERTION]: shouldLoad
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/bootstrapper-surface.test.ts:104:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/class-definitions.test.ts:41:1
+✖ a pair binds the concrete to its abstract (3.634398ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok((await container.get(Store)) instanceof MemoryStore)
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/class-definitions.test.ts:45:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/class-definitions.test.ts:48:1
+✖ a pair with a list of abstracts binds them all to one shared instance (0.433406ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(store instanceof MemoryStore)
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/class-definitions.test.ts:53:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/class-definitions.test.ts:58:1
+✖ a pair binds to a typed token, and the concrete is autowired through its inject list (0.225666ms)
+  Error [BindingNotFoundError]: Token 'Clock' is not bound. Available: none
+      at Container.resolve (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/node_modules/@tsnomad/di-container/dist/Container.js:190:35)
+      at Container.get (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/node_modules/@tsnomad/di-container/dist/Container.js:168:28)
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/class-definitions.test.ts:68:33)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    token: 'Clock',
+    availableTokens: []
+  }
+
+test at test/class-definitions.test.ts:73:1
+✖ the 0.1 record form binds each token to its factory, cached as 0.1 did (0.177124ms)
+  Error [BindingNotFoundError]: Token 'Logger' is not bound. Available: none
+      at Container.resolve (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/node_modules/@tsnomad/di-container/dist/Container.js:190:35)
+      at Container.get (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/node_modules/@tsnomad/di-container/dist/Container.js:168:28)
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/class-definitions.test.ts:86:33)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    token: 'Logger',
+    availableTokens: []
+  }
+
+test at test/class-definitions.test.ts:92:1
+✖ every pair of every initializer is bound, in list order (1.1273ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   [class MemoryStore extends Store],
+  -   [class SystemClock],
+  -   [class Mailer] {
+  -     inject: [
+  -       [class Store]
+  -     ]
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/class-definitions.test.ts:109:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [Array],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/class-definitions.test.ts:118:1
+✖ a duplicate binding fails the load with a LoaderException naming the second initializer (0.370813ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/class-definitions.test.ts:131:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/class-definitions.test.ts:143:1
+✖ a pair with no abstract fails the load with the container error as the cause (0.160797ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/class-definitions.test.ts:145:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/class-definitions.test.ts:151:1
+✖ an answer that is neither a list of pairs nor a plain record fails the load and binds nothing (0.24493ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/class-definitions.test.ts:166:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/controllers.test.ts:23:1
+✖ each controller registers one route whose getter resolves the controller from the container (2.469888ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 2
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/controllers.test.ts:32:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/controllers.test.ts:37:1
+✖ a getter does not build its controller until the strategy calls it (0.353299ms)
+  TypeError [Error]: rest.getters[0] is not a function
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/controllers.test.ts:49:24)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/controllers.test.ts:53:1
+✖ a controller may need a binding a later initializer makes (0.351752ms)
+  TypeError [Error]: rest.getters[0] is not a function
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/controllers.test.ts:69:44)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/controllers.test.ts:73:1
+✖ routes register in list order across initializers, with one strategy resolve (1.200409ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'resolve:RestStrategy',
+  -   'registerRoute',
+  -   'registerRoute',
+  -   'registerRoute'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/controllers.test.ts:81:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'resolve:RestStrategy', 'registerRoute', 'registerRoute', 'registerRoute' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/controllers.test.ts:88:1
+✖ controllers with no REST strategy bound fail the load with a LoaderException and the container error (0.535052ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/controllers.test.ts:96:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/controllers.test.ts:110:1
+✖ a malformed answer fails the load with a LoaderException and registers nothing from it (0.37899ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/controllers.test.ts:123:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/errors.test.ts:31:1
+✖ a DiException thrown from load() becomes a LoaderException with it as the cause (1.044157ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/errors.test.ts:44:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/errors.test.ts:54:1
+✖ every DiException subclass is wrapped, and the cause is the same object (0.299265ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/errors.test.ts:63:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/errors.test.ts:76:1
+✖ an error that is not a DiException passes through unchanged, from every method an initializer has (0.364135ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection: setContainer
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/errors.test.ts:86:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/errors.test.ts:90:1
+✖ a rejected promise from load() that is not a DiException passes through unchanged (0.227953ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/errors.test.ts:93:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/errors.test.ts:99:1
+✖ the load stops at the first failing initializer, and later initializers never start (0.29891ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/errors.test.ts:110:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/errors.test.ts:119:1
+✖ a plain object initializer is named anonymous initializer, with its position (0.136163ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/errors.test.ts:121:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/errors.test.ts:139:1
+✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged (0.357729ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection: bindAction
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/errors.test.ts:164:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/errors.test.ts:169:1
+✖ an async attach on the event strategy is awaited too (0.231035ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/errors.test.ts:175:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:24:1
+✖ a bare action string binds the event class to the action with no transformer (1.675816ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:28:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:34:1
+✖ an action object passes its own transformer (0.235002ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:38:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:44:1
+✖ a list of actions binds each one, strings and objects, in order, across every pair (0.817492ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   [
+  -     [class OrderPlaced],
+  -     'order.placed',
+  -     undefined
+  -   ],
+  -   [
+  -     [class OrderPlaced],
+  -     'order.completed',
+  -     [Function: toOrder]
+  -   ],
+  -   [
+  -     [class UserCreated],
+  -     'customer.created',
+  -     [Function: toUser]
+  -   ]
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:53:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [Array],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:63:1
+✖ the strategy is resolved once for an initializer with several bindings (0.174261ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:72:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:82:1
+✖ bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error (0.259109ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:90:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:98:1
+✖ a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy (0.33112ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'u1'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:108:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'u1' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:113:1
+✖ pairs and 0.1 entries in one list each reach their own strategy, in list order (0.216445ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'bindAction:order.placed:order.placed',
+  -   'attach:user.created',
+  -   'bindAction:user.created:customer.created'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:123:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'bindAction:order.placed:order.placed', 'attach:user.created', 'bindAction:user.created:customer.created' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:129:1
+✖ an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged (0.189344ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:136:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/event-bindings.test.ts:142:1
+✖ a malformed answer fails the load with a LoaderException and binds nothing from it (0.27769ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/event-bindings.test.ts:161:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/legacy-initializers.test.ts:29:1
+✖ an initializer that binds the event strategy in its record form serves its own listeners and later ones (1.192749ms)
+  Error [BindingNotFoundError]: Token 'Provider' is not bound. Available: none
+      at Container.resolve (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/node_modules/@tsnomad/di-container/dist/Container.js:190:35)
+      at Container.get (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/node_modules/@tsnomad/di-container/dist/Container.js:168:28)
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/legacy-initializers.test.ts:69:36)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    token: 'Provider',
+    availableTokens: []
+  }
+
+test at test/legacy-initializers.test.ts:75:1
+✖ a 0.1 event with only an instance getId reaches a listener the loader attached by id (1.859036ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'ping'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/legacy-initializers.test.ts:91:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'ping' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:31:1
+✖ a plain function listener hears its event (3.215611ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'u1'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:44:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'u1' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:47:1
+✖ a list of listeners runs in list order, for each event id (0.554866ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'first',
+  -   'second',
+  -   'order'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:66:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'first', 'second', 'order' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:69:1
+✖ a handler class is resolved from the container and its handle receives the event (0.400753ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   [
+  -     'double',
+  -     'u1'
+  -   ]
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:87:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ [ 'double', 'u1' ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:90:1
+✖ a handler class is resolved when the event fires, so it may need a binding a later initializer makes (0.388714ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'u1'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:115:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'u1' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:118:1
+✖ the handler is not built during load, only when its event fires (0.433918ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:132:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:135:1
+✖ broadcast waits for an async handler's handle to settle (0.414395ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  -   'handled',
+      'broadcast resolved'
+    ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:149:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'broadcast resolved' ],
+    expected: [ 'handled', 'broadcast resolved' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:152:1
+✖ a handler that cannot be resolved fails the broadcast, not the load (0.521506ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:164:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:172:1
+✖ an error from handle reaches the broadcast unchanged (0.366734ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:183:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:190:1
+✖ a function with a prototype but no handle method is a plain listener, called with the event (0.453117ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'u1'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:200:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'u1' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:203:1
+✖ a plain function is attached itself, by event id, at the default priority (0.65032ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:208:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:214:1
+✖ the strategy bound under the 0.1 string token is the one the loader uses (0.49498ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'heard'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:225:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'heard' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:228:1
+✖ the 0.1 bootstrap option reads the event strategy by the token it names (0.31631ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'heard'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:239:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'heard' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:243:1
+✖ listeners with no event strategy bound fail the load with a LoaderException and the container error (0.255322ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:251:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/listeners.test.ts:264:1
+✖ a malformed answer fails the load with a LoaderException and attaches nothing from it (0.420612ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/listeners.test.ts:279:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/load-condition.test.ts:37:1
+✖ a false condition skips every step after it, and the container was set before the question (2.064233ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'Off.setContainer',
+  -   'Off.shouldLoad'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-condition.test.ts:42:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'Off.setContainer', 'Off.shouldLoad' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-condition.test.ts:46:1
+✖ a condition that resolves false skips every step after it (0.340391ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'Off.setContainer',
+  -   'Off.shouldLoad'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-condition.test.ts:55:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'Off.setContainer', 'Off.shouldLoad' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-condition.test.ts:58:1
+✖ a false condition skips only its own initializer, and the next one loads in full (0.291983ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'Off.setContainer',
+  -   'Off.shouldLoad',
+  -   'On.setContainer',
+  -   'On.getClassDefinitions',
+  -   'bind',
+  -   'On.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-condition.test.ts:69:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'Off.setContainer', 'Off.shouldLoad', 'On.setContainer', 'On.getClassDefinitions', 'bind', 'On.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-condition.test.ts:80:1
+✖ a true condition, sync or async, runs every step (0.262653ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'On.setContainer',
+  -   'On.shouldLoad',
+  -   'On.getClassDefinitions',
+  -   'bind',
+  -   'On.getEventBindings',
+  -   'resolve:ActionBindingStrategy',
+  -   'bindAction:order.placed:order.placed',
+  -   'On.getListeners',
+  -   'resolve:EventStrategy',
+  -   'attach:user.created',
+  -   'On.getTaskHandlers',
+  -   'resolve:TaskStrategy',
+  -   'taskAttach:send-sale',
+  -   'On.getControllers',
+  -   'resolve:RestStrategy',
+  -   'registerRoute',
+  -   'On.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-condition.test.ts:84:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'On.setContainer', 'On.shouldLoad', 'On.getClassDefinitions', 'bind', 'On.getEventBindings', 'resolve:ActionBindingStrategy', 'bindAction:order.placed:order.placed', 'On.getListeners', 'resolve:EventStrategy', 'attach:user.created', 'On.getTaskHandlers', 'resolve:TaskStrategy', 'taskAttach:send-sale', 'On.getControllers', 'resolve:RestStrategy', 'registerRoute', 'On.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-condition.test.ts:106:1
+✖ the condition is asked after setContainer and before the class definitions (0.307259ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   true,
+  -   false
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-condition.test.ts:120:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ true, false ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-condition.test.ts:123:1
+✖ an answer that is not a boolean fails the load with a LoaderException and runs no later step (0.433607ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-condition.test.ts:129:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/load-condition.test.ts:143:1
+✖ a condition that throws stops the load with its own error, unchanged (0.274935ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-condition.test.ts:151:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/load-order.test.ts:37:1
+✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load (1.851067ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'Core.setContainer',
+  -   'Core.shouldLoad',
+  -   'Core.getClassDefinitions',
+  -   'bind',
+  -   'Core.getEventBindings',
+  -   'resolve:ActionBindingStrategy',
+  -   'bindAction:order.placed:order.placed',
+  -   'Core.getListeners',
+  -   'resolve:EventStrategy',
+  -   'attach:user.created',
+  -   'Core.getTaskHandlers',
+  -   'resolve:TaskStrategy',
+  -   'taskAttach:send-sale',
+  -   'Core.getControllers',
+  -   'resolve:RestStrategy',
+  -   'registerRoute',
+  -   'Core.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-order.test.ts:41:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'Core.setContainer', 'Core.shouldLoad', 'Core.getClassDefinitions', 'bind', 'Core.getEventBindings', 'resolve:ActionBindingStrategy', 'bindAction:order.placed:order.placed', 'Core.getListeners', 'resolve:EventStrategy', 'attach:user.created', 'Core.getTaskHandlers', 'resolve:TaskStrategy', 'taskAttach:send-sale', 'Core.getControllers', 'resolve:RestStrategy', 'registerRoute', 'Core.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-order.test.ts:62:1
+✖ each initializer finishes every step before the next initializer starts (0.365952ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'First.setContainer',
+  -   'First.getClassDefinitions',
+  -   'bind',
+  -   'First.getListeners',
+  -   'resolve:EventStrategy',
+  -   'attach:user.created',
+  -   'First.load',
+  -   'Second.setContainer',
+  -   'Second.getClassDefinitions',
+  -   'bind',
+  -   'Second.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-order.test.ts:78:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'First.setContainer', 'First.getClassDefinitions', 'bind', 'First.getListeners', 'resolve:EventStrategy', 'attach:user.created', 'First.load', 'Second.setContainer', 'Second.getClassDefinitions', 'bind', 'Second.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-order.test.ts:93:1
+✖ a later initializer is not bound yet while an earlier one loads (0.241395ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   false
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-order.test.ts:107:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ false ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-order.test.ts:111:1
+✖ an initializer with only some methods runs only those steps, in the same order (0.246776ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'Partial.setContainer',
+  -   'Partial.getControllers',
+  -   'resolve:RestStrategy',
+  -   'registerRoute',
+  -   'Partial.load'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-order.test.ts:121:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'Partial.setContainer', 'Partial.getControllers', 'resolve:RestStrategy', 'registerRoute', 'Partial.load' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-order.test.ts:130:1
+✖ an async load finishes before the next initializer starts (0.270403ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'First.load',
+  -   'First.load settled',
+  -   'Second.setContainer'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-order.test.ts:142:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'First.load', 'First.load settled', 'Second.setContainer' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-order.test.ts:145:1
+✖ load resolves only after the last initializer has loaded (0.187702ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  -   'Last.load',
+  -   'Last.load settled',
+      'load resolved'
+    ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-order.test.ts:157:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'load resolved' ],
+    expected: [ 'Last.load', 'Last.load settled', 'load resolved' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/load-order.test.ts:160:1
+✖ each initializer receives the bootstrapper container itself (0.222387ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/load-order.test.ts:167:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/task-handlers.test.ts:24:1
+✖ a handler class is attached for its task class, and running the task calls its handle with the task (1.736869ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:35:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/task-handlers.test.ts:41:1
+✖ the handler is resolved through the container when the task runs, not during load (0.932433ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   [
+  -     'double',
+  -     's1'
+  -   ]
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:66:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ [ 'double', 's1' ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/task-handlers.test.ts:69:1
+✖ a handler may need a binding a later initializer makes (0.329784ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   's1'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:94:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 's1' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/task-handlers.test.ts:97:1
+✖ a list of handlers attaches each one, in order, across every pair, with one strategy resolve (0.246643ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'resolve:TaskStrategy',
+  -   'taskAttach:send-sale',
+  -   'taskAttach:send-sale',
+  -   'taskAttach:refresh-plan'
+  - ]
+  
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:118:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'resolve:TaskStrategy', 'taskAttach:send-sale', 'taskAttach:send-sale', 'taskAttach:refresh-plan' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/task-handlers.test.ts:124:1
+✖ the function the strategy runs settles only after the handler's handle settles (0.224872ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'handler')
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:135:24)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/task-handlers.test.ts:141:1
+✖ a failing handler rejects the function the strategy runs, so the strategy sees the failure (0.148441ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'handler')
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:158:39)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/task-handlers.test.ts:162:1
+✖ a handler that cannot be resolved rejects the function the strategy runs (0.137058ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'handler')
+      at TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:174:39)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/task-handlers.test.ts:177:1
+✖ handlers with no task strategy bound fail the load with a LoaderException and the container error (0.316707ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:187:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/task-handlers.test.ts:201:1
+✖ a malformed answer fails the load with a LoaderException and attaches nothing from it (0.344937ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///media/alex/DATA/siren-wt/ncc-s07-proof-loader/test/task-handlers.test.ts:220:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }

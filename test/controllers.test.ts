@@ -114,6 +114,7 @@ test.skip('a malformed answer fails the load with a LoaderException and register
     ['a promise', Promise.resolve([Controller])],
     ['a class that is not in a list', Controller],
     ['a record', { receive: Controller }],
+    ['a Set', new Set([Controller])],
     ['a list holding an instance', [Controller, new Controller()]],
     ['a list holding a string', [Controller, 'Controller']],
   ];

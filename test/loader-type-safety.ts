@@ -129,7 +129,7 @@ void StringCondition;
 
 class ConcreteIsAString implements HasClassDefinitions {
   getClassDefinitions(): readonly ClassDefinition[] {
-    // @ts-expect-error a concrete is a class
+    // @ts-expect-error a concrete is a class, not a string
     return [['MemoryStore', Store]];
   }
 }

@@ -115,8 +115,8 @@ test.skip('a handler class is resolved when the event fires, so it may need a bi
   assert.deepEqual(sent, ['u1']);
 });
 
-test.skip('the handler is not built during load', async () => {
-  const { container } = busContainer();
+test.skip('the handler is not built during load, only when its event fires', async () => {
+  const { container, events } = busContainer();
   let built = 0;
   class Counted implements CanHandle<UserCreated> {
     constructor() {
@@ -126,8 +126,10 @@ test.skip('the handler is not built during load', async () => {
   }
 
   await new Bootstrapper(container, [listening(() => ({ [UserCreated.getId()]: Counted }))]).load();
-
   assert.equal(built, 0);
+
+  await events.broadcast(new UserCreated('u1'));
+  assert.equal(built, 1);
 });
 
 test.skip("broadcast waits for an async handler's handle to settle", async () => {

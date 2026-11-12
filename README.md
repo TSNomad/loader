@@ -25,6 +25,38 @@ const container = new Container();
 await new Bootstrapper(container, [new AppInitializer()]).bootstrap();
 ```
 
+## Load order
+
+`load()` runs PHPNomad's steps for each initializer, one initializer at
+a time: `setContainer`, `shouldLoad`, class definitions, event
+bindings, listeners, task handlers, controllers, then `load`. A false
+`shouldLoad()` skips the rest of that initializer. The class comment on
+`Bootstrapper` and `docs/architecture/ncc-slice-7.md` give the details.
+
+## Upgrading from 0.1
+
+- Each initializer now runs every step before the next one starts, so
+  a later initializer's bindings are not there during an earlier one's
+  `load()`.
+- Listeners with no `EventStrategy` bound fail the load with a
+  `LoaderException`, where 0.1 skipped them.
+- `CanSetContainer` is the container package's, and its `setContainer`
+  returns `this`. A class that names the interface returns `this`.
+- `HasEventBindings` is the event package's pair shape. The 0.1
+  `{ eventId, listener }` entries still load.
+- `bootstrap()` still works and is deprecated. Call `load()`.
+
+## Where this differs from PHPNomad
+
+- `load()` is async and awaits each step, `shouldLoad()` and the
+  initializer's own `load()` included.
+- An empty list never resolves its strategy. PHPNomad resolves the
+  event and REST strategies as soon as an initializer has the method.
+- A malformed answer fails the load with a `LoaderException`. PHPNomad
+  wraps only `DiException`.
+- The task and REST strategies are read by the keys `'TaskStrategy'`
+  and `'RestStrategy'` until their packages exist.
+
 ## Extracted 2026-09-17
 
 This package was extracted on 2026-09-17 from a prototype carried inside
