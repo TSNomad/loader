@@ -23,21 +23,21 @@ import {
 } from '../dist/interfaces.js';
 import { traced } from './fixtures.ts';
 
-test.skip('initializers given as separate arguments load in order, as in PHPNomad', async () => {
+test('initializers given as separate arguments load in order, as in PHPNomad', async () => {
   const log: string[] = [];
   const container = new Container();
   await new Bootstrapper(container, traced(log, 'A', { load: () => {} }), traced(log, 'B', { load: () => {} })).load();
   assert.deepEqual(log, ['A.load', 'B.load']);
 });
 
-test.skip('initializers given as one array, the 0.1 form, load in order', async () => {
+test('initializers given as one array, the 0.1 form, load in order', async () => {
   const log: string[] = [];
   const container = new Container();
   await new Bootstrapper(container, [traced(log, 'A', { load: () => {} }), traced(log, 'B', { load: () => {} })]).load();
   assert.deepEqual(log, ['A.load', 'B.load']);
 });
 
-test.skip('bootstrap(), the 0.1 entry point, runs the same steps as load()', async () => {
+test('bootstrap(), the 0.1 entry point, runs the same steps as load()', async () => {
   const log: string[] = [];
   const container = new Container();
   class Store {}
@@ -48,12 +48,12 @@ test.skip('bootstrap(), the 0.1 entry point, runs the same steps as load()', asy
   assert.equal(container.has('Store'), true);
 });
 
-test.skip('a bootstrapper with no initializers loads', async () => {
+test('a bootstrapper with no initializers loads', async () => {
   await new Bootstrapper(new Container()).load();
   await new Bootstrapper(new Container(), []).load();
 });
 
-test.skip('a bootstrapper is Loadable, so it can be an initializer of another bootstrapper', async () => {
+test('a bootstrapper is Loadable, so it can be an initializer of another bootstrapper', async () => {
   const log: string[] = [];
   const container = new Container();
   const inner = new Bootstrapper(container, traced(log, 'Inner', { load: () => {} }));
@@ -61,7 +61,7 @@ test.skip('a bootstrapper is Loadable, so it can be an initializer of another bo
   assert.deepEqual(log, ['Before.load', 'Inner.load', 'After.load']);
 });
 
-test.skip('the same initializers can load into two containers', async () => {
+test('the same initializers can load into two containers', async () => {
   class Value {}
   const initializers = [{ getClassDefinitions: () => [[Value, 'Value']] } as any];
   const one = new Container();
@@ -89,7 +89,7 @@ test('BaseInitializer keeps the container and returns itself, as PHPNomad setCon
   assert.equal(core.current(), container);
 });
 
-test.skip('each type guard answers true when the method is there and false when it is not', () => {
+test('each type guard answers true when the method is there and false when it is not', () => {
   const guards: Array<[string, (init: any) => boolean]> = [
     ['getClassDefinitions', hasClassDefinitions],
     ['getListeners', hasListeners],

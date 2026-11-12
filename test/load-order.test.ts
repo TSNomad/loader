@@ -34,7 +34,7 @@ function everyStep(log: string[], name: string) {
   });
 }
 
-test.skip('one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load', async () => {
+test('one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load', async () => {
   const { container, log } = wire();
   await new Bootstrapper(container, [everyStep(log, 'Core')]).load();
 
@@ -59,7 +59,7 @@ test.skip('one initializer runs every step in PHPNomad order: container, conditi
   ]);
 });
 
-test.skip('each initializer finishes every step before the next initializer starts', async () => {
+test('each initializer finishes every step before the next initializer starts', async () => {
   const { container, log } = wire();
   const first = traced(log, 'First', {
     setContainer: true,
@@ -90,7 +90,7 @@ test.skip('each initializer finishes every step before the next initializer star
   ]);
 });
 
-test.skip('a later initializer is not bound yet while an earlier one loads', async () => {
+test('a later initializer is not bound yet while an earlier one loads', async () => {
   const { container, log } = wire();
   const seen: boolean[] = [];
   const first = traced(log, 'First', {
@@ -108,7 +108,7 @@ test.skip('a later initializer is not bound yet while an earlier one loads', asy
   assert.equal(container.has(Store), true);
 });
 
-test.skip('an initializer with only some methods runs only those steps, in the same order', async () => {
+test('an initializer with only some methods runs only those steps, in the same order', async () => {
   const { container, log } = wire();
   const partial = traced(log, 'Partial', {
     load: () => {},
@@ -127,7 +127,7 @@ test.skip('an initializer with only some methods runs only those steps, in the s
   ]);
 });
 
-test.skip('an async load finishes before the next initializer starts', async () => {
+test('an async load finishes before the next initializer starts', async () => {
   const { container, log } = wire();
   const first = traced(log, 'First', {
     load: async () => {
@@ -142,7 +142,7 @@ test.skip('an async load finishes before the next initializer starts', async () 
   assert.deepEqual(log, ['First.load', 'First.load settled', 'Second.setContainer']);
 });
 
-test.skip('load resolves only after the last initializer has loaded', async () => {
+test('load resolves only after the last initializer has loaded', async () => {
   const { container, log } = wire();
   const last = traced(log, 'Last', {
     load: async () => {
@@ -157,7 +157,7 @@ test.skip('load resolves only after the last initializer has loaded', async () =
   assert.deepEqual(log, ['Last.load', 'Last.load settled', 'load resolved']);
 });
 
-test.skip('each initializer receives the bootstrapper container itself', async () => {
+test('each initializer receives the bootstrapper container itself', async () => {
   const { container, log } = wire();
   const first = traced(log, 'First', { setContainer: true });
   const second = traced(log, 'Second', { setContainer: true });

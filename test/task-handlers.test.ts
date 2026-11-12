@@ -21,7 +21,7 @@ function handlers(answer: () => unknown): any {
   return { getTaskHandlers: answer };
 }
 
-test.skip('a handler class is attached for its task class, and running the task calls its handle with the task', async () => {
+test('a handler class is attached for its task class, and running the task calls its handle with the task', async () => {
   const { container, tasks } = wire();
   const handled: string[] = [];
   class SendSaleHandler {
@@ -38,7 +38,7 @@ test.skip('a handler class is attached for its task class, and running the task 
   assert.deepEqual(handled, ['s1']);
 });
 
-test.skip('the handler is resolved through the container when the task runs, not during load', async () => {
+test('the handler is resolved through the container when the task runs, not during load', async () => {
   const { container, tasks } = wire();
   const handled: unknown[] = [];
   let built = 0;
@@ -66,7 +66,7 @@ test.skip('the handler is resolved through the container when the task runs, not
   assert.deepEqual(handled, [['double', 's1']]);
 });
 
-test.skip('a handler may need a binding a later initializer makes', async () => {
+test('a handler may need a binding a later initializer makes', async () => {
   const { container, tasks } = wire();
   const sent: string[] = [];
   class Sender {
@@ -94,7 +94,7 @@ test.skip('a handler may need a binding a later initializer makes', async () => 
   assert.deepEqual(sent, ['s1']);
 });
 
-test.skip('a list of handlers attaches each one, in order, across every pair, with one strategy resolve', async () => {
+test('a list of handlers attaches each one, in order, across every pair, with one strategy resolve', async () => {
   const { container, tasks, log } = wire();
   const order: string[] = [];
   class Audit {
@@ -121,7 +121,7 @@ test.skip('a list of handlers attaches each one, in order, across every pair, wi
   assert.deepEqual(order, ['audit', 'send', 'refresh']);
 });
 
-test.skip("the function the strategy runs settles only after the handler's handle settles", async () => {
+test("the function the strategy runs settles only after the handler's handle settles", async () => {
   const { container, tasks } = wire();
   const order: string[] = [];
   class Slow {
@@ -138,7 +138,7 @@ test.skip("the function the strategy runs settles only after the handler's handl
   assert.deepEqual(order, ['handled', 'settled']);
 });
 
-test.skip('a failing handler rejects the function the strategy runs, so the strategy sees the failure', async () => {
+test('a failing handler rejects the function the strategy runs, so the strategy sees the failure', async () => {
   const { container, tasks } = wire();
   const boom = new Error('cloud unreachable');
   class Fails {
@@ -159,7 +159,7 @@ test.skip('a failing handler rejects the function the strategy runs, so the stra
   await assert.rejects(tasks.calls[1].handler(new SendSale('s1')), (error) => error === boom);
 });
 
-test.skip('a handler that cannot be resolved rejects the function the strategy runs with the container error unchanged', async () => {
+test('a handler that cannot be resolved rejects the function the strategy runs with the container error unchanged', async () => {
   const { container, tasks } = wire();
   class NeedsSender {
     handle(): void {}
@@ -174,7 +174,7 @@ test.skip('a handler that cannot be resolved rejects the function the strategy r
   await assert.rejects(tasks.calls[0].handler(new SendSale('s1')), (error) => error === unbound);
 });
 
-test.skip('handlers with no task strategy bound fail the load with a LoaderException and the container error', async () => {
+test('handlers with no task strategy bound fail the load with a LoaderException and the container error', async () => {
   const { container } = wire(['TaskStrategy']);
   class Jobs {
     getTaskHandlers() {
@@ -192,7 +192,7 @@ test.skip('handlers with no task strategy bound fail the load with a LoaderExcep
   });
 });
 
-test.skip('the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load', async () => {
+test('the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load', async () => {
   const { container } = wire(['TaskStrategy']);
   let asked = 0;
   await assert.rejects(new Bootstrapper(container, [handlers(() => {
@@ -202,7 +202,7 @@ test.skip('the task strategy is resolved before the list is read, as PHPNomad do
   assert.equal(asked, 0);
 });
 
-test.skip('a malformed answer fails the load with a TypeError and attaches nothing from it', async () => {
+test('a malformed answer fails the load with a TypeError and attaches nothing from it', async () => {
   class Handler {
     handle(): void {}
   }

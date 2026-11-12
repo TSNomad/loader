@@ -20,7 +20,7 @@ function controllers(answer: () => unknown): any {
   return { getControllers: answer };
 }
 
-test.skip('each controller registers one route whose getter resolves the controller from the container', async () => {
+test('each controller registers one route whose getter resolves the controller from the container', async () => {
   const { container, rest } = wire();
   class ConnectController {}
   class ReceiveController {}
@@ -34,7 +34,7 @@ test.skip('each controller registers one route whose getter resolves the control
   assert.equal(await rest.getters[1](), double);
 });
 
-test.skip('a getter does not build its controller until the strategy calls it', async () => {
+test('a getter does not build its controller until the strategy calls it', async () => {
   const { container, rest } = wire();
   let built = 0;
   class Counted {
@@ -50,7 +50,7 @@ test.skip('a getter does not build its controller until the strategy calls it', 
   assert.equal(built, 1);
 });
 
-test.skip('a controller may need a binding a later initializer makes', async () => {
+test('a controller may need a binding a later initializer makes', async () => {
   const { container, rest } = wire();
   class Receiver {}
   class ReceiveController {
@@ -70,7 +70,7 @@ test.skip('a controller may need a binding a later initializer makes', async () 
   assert.ok(controller.receiver instanceof Receiver);
 });
 
-test.skip('routes register in list order across initializers, with one strategy resolve', async () => {
+test('routes register in list order across initializers, with one strategy resolve', async () => {
   const { container, rest, log } = wire();
   class A {}
   class B {}
@@ -85,7 +85,7 @@ test.skip('routes register in list order across initializers, with one strategy 
   assert.ok(built[2] instanceof C);
 });
 
-test.skip('controllers with no REST strategy bound fail the load with a LoaderException and the container error', async () => {
+test('controllers with no REST strategy bound fail the load with a LoaderException and the container error', async () => {
   const { container } = wire(['RestStrategy']);
   class Routes {
     getControllers() {
@@ -101,7 +101,7 @@ test.skip('controllers with no REST strategy bound fail the load with a LoaderEx
   });
 });
 
-test.skip('the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load', async () => {
+test('the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load', async () => {
   const { container } = wire(['RestStrategy']);
   let asked = 0;
   await assert.rejects(new Bootstrapper(container, [controllers(() => {
@@ -111,7 +111,7 @@ test.skip('the REST strategy is resolved before the list is read, as PHPNomad do
   assert.equal(asked, 0);
 });
 
-test.skip('a malformed answer fails the load with a TypeError and registers nothing from it', async () => {
+test('a malformed answer fails the load with a TypeError and registers nothing from it', async () => {
   class Controller {}
   const malformed: Array<[string, unknown]> = [
     ['undefined', undefined],

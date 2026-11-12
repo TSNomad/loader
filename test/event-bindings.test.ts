@@ -21,7 +21,7 @@ function bindings(answer: () => unknown): any {
 const toOrder = (id: string) => new OrderPlaced(id);
 const toUser = (id: string) => new UserCreated(id);
 
-test.skip('a bare action string binds the event class to the action with no transformer', async () => {
+test('a bare action string binds the event class to the action with no transformer', async () => {
   const { container, actions } = wire();
   await new Bootstrapper(container, [bindings(() => [[OrderPlaced, 'order.placed']])]).load();
 
@@ -31,7 +31,7 @@ test.skip('a bare action string binds the event class to the action with no tran
   assert.equal(actions.calls[0].transformer, undefined);
 });
 
-test.skip('an action object passes its own transformer', async () => {
+test('an action object passes its own transformer', async () => {
   const { container, actions } = wire();
   await new Bootstrapper(container, [bindings(() => [[OrderPlaced, { action: 'order.completed', transformer: toOrder }]])]).load();
 
@@ -41,7 +41,7 @@ test.skip('an action object passes its own transformer', async () => {
   assert.equal(actions.calls[0].transformer, toOrder);
 });
 
-test.skip('a list of actions binds each one, strings and objects, in order, across every pair', async () => {
+test('a list of actions binds each one, strings and objects, in order, across every pair', async () => {
   const { container, actions } = wire();
   await new Bootstrapper(container, [
     bindings(() => [
@@ -60,7 +60,7 @@ test.skip('a list of actions binds each one, strings and objects, in order, acro
   );
 });
 
-test.skip('the strategy is resolved once for an initializer with several bindings', async () => {
+test('the strategy is resolved once for an initializer with several bindings', async () => {
   const { container, log } = wire();
   await new Bootstrapper(container, [
     bindings(() => [
@@ -72,14 +72,14 @@ test.skip('the strategy is resolved once for an initializer with several binding
   assert.equal(log.filter((line) => line === 'resolve:ActionBindingStrategy').length, 1);
 });
 
-test.skip('an empty list resolves no strategy, so it loads with none bound', async () => {
+test('an empty list resolves no strategy, so it loads with none bound', async () => {
   const { container, log } = wire(['ActionBindingStrategy', 'EventStrategy']);
   await new Bootstrapper(container, [bindings(() => [])]).load();
 
   assert.deepEqual(log, []);
 });
 
-test.skip('bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error', async () => {
+test('bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error', async () => {
   const { container } = wire(['ActionBindingStrategy']);
   class StoreBindings {
     getEventBindings() {
@@ -95,7 +95,7 @@ test.skip('bindings with no ActionBindingStrategy bound fail the load with a Loa
   });
 });
 
-test.skip('a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy', async () => {
+test('a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy', async () => {
   const { container, events, log } = wire(['ActionBindingStrategy']);
   const heard: string[] = [];
   const listener = (event: UserCreated) => {
@@ -110,7 +110,7 @@ test.skip('a 0.1 { eventId, listener } entry loads as a plain listener on the ev
   assert.deepEqual(log, ['resolve:EventStrategy', 'attach:user.created']);
 });
 
-test.skip('pairs and 0.1 entries in one list each reach their own strategy, in list order', async () => {
+test('pairs and 0.1 entries in one list each reach their own strategy, in list order', async () => {
   const { container, log } = wire();
   await new Bootstrapper(container, [
     bindings(() => [
@@ -126,7 +126,7 @@ test.skip('pairs and 0.1 entries in one list each reach their own strategy, in l
   );
 });
 
-test.skip('an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged', async () => {
+test('an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged', async () => {
   const { container, actions } = wire();
   const refusal = new TypeError("bindAction refused 'order.placed'");
   actions.bindAction = () => {
@@ -139,7 +139,7 @@ test.skip('an error the strategy throws, such as its TypeError for a bad event c
   );
 });
 
-test.skip('a malformed answer fails the load with a TypeError and binds nothing from it', async () => {
+test('a malformed answer fails the load with a TypeError and binds nothing from it', async () => {
   const malformed: Array<[string, unknown]> = [
     ['undefined', undefined],
     ['a promise', Promise.resolve([[OrderPlaced, 'order.placed']])],

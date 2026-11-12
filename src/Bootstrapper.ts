@@ -108,8 +108,24 @@
  *   form.
  */
 
-import type { Container } from '@tsnomad/di-container';
+import { DiException } from '@tsnomad/di-container';
+import type { Container, Token, TypedToken } from '@tsnomad/di-container';
+import { ActionBindingStrategy, EventStrategy } from '@tsnomad/event';
 import type { Initializer, Loadable } from './interfaces.js';
+import {
+  canSetContainer,
+  hasClassDefinitions,
+  hasControllers,
+  hasEventBindings,
+  hasListeners,
+  hasLoadCondition,
+  hasTaskHandlers,
+  isLoadable,
+} from './interfaces.js';
+import { LoaderException } from './LoaderException.js';
+import { REST_STRATEGY_TOKEN, TASK_STRATEGY_TOKEN } from './ports.js';
+import type { LoaderRestStrategy, LoaderTaskStrategy } from './ports.js';
+import { describeValue, initializerName, isClassSyntax, isConstructable, isHandlerClass, isPlainObject } from './shapes.js';
 
 /**
  * The 0.1 name of the token the bootstrapper reads the event strategy
@@ -134,6 +150,30 @@ export interface BootstrapOptions {
   eventStrategyToken?: string;
 }
 
+/** The token a load reads the event strategy by. */
+type EventStrategyKey = Token | TypedToken<EventStrategy>;
+
+/** The part of the event strategy the loader calls. */
+interface AttachesListeners {
+  attach(eventId: string, listener: (event: any) => unknown): unknown;
+}
+
+/** The container's `bind`, in the two forms the loader calls. */
+interface Binds {
+  bind(...args: unknown[]): unknown;
+}
+
+/** One initializer's place in the load, for error messages. */
+interface Place {
+  readonly initializer: unknown;
+  readonly position: number;
+}
+
+/** One validated entry of `getEventBindings()`. */
+type EventBindingPlan =
+  | { readonly kind: 'actions'; readonly eventClass: unknown; readonly actions: ReadonlyArray<{ action: string; transformer?: unknown }> }
+  | { readonly kind: 'legacy'; readonly eventId: string; readonly listener: (event: any) => unknown };
+
 export class Bootstrapper implements Loadable {
   private readonly container: Container;
   private readonly initializers: readonly unknown[];
@@ -147,7 +187,8 @@ export class Bootstrapper implements Loadable {
   constructor(container: Container, ...initializers: Initializer[]);
   constructor(container: Container, ...initializers: Initializer[] | [readonly Initializer[]]) {
     this.container = container;
-    this.initializers = initializers;
+    this.initializers =
+      initializers.length === 1 && Array.isArray(initializers[0]) ? [...initializers[0]] : [...initializers];
   }
 
   /**
@@ -155,27 +196,21 @@ export class Bootstrapper implements Loadable {
    * the next one starts. See the class comment for the steps and the
    * errors.
    *
-   * Stub: packet P1 implements it.
-   *
    * @throws LoaderException, through the returned promise, as the class
    *   comment describes
    */
   load(): Promise<void> {
-    void this.initializers;
-    return Promise.resolve();
+    return this.run(EventStrategy);
   }
 
   /**
    * The 0.1 entry point. Runs `load()`, reading the event strategy by
    * `options.eventStrategyToken` when it is given.
    *
-   * Stub: packet P1 implements it.
-   *
    * @deprecated Call `load()`.
    */
   bootstrap(options: BootstrapOptions = {}): Promise<void> {
-    void options;
-    return Promise.resolve();
+    return this.run(options.eventStrategyToken ?? EVENT_STRATEGY_TOKEN);
   }
 
   /**
@@ -183,5 +218,311 @@ export class Bootstrapper implements Loadable {
    */
   getContainer(): Container {
     return this.container;
+  }
+
+  /**
+   * Loads each initializer in turn, and turns a `DiException` from any
+   * of its steps into a `LoaderException` naming it. Every other error
+   * passes through unchanged. The first failure stops the load.
+   */
+  private async run(eventKey: EventStrategyKey): Promise<void> {
+    for (const [index, initializer] of this.initializers.entries()) {
+      const place: Place = { initializer, position: index + 1 };
+      try {
+        await this.loadInitializer(initializer as Initializer, place, eventKey);
+      } catch (error) {
+        if (error instanceof DiException) {
+          throw new LoaderException(initializerName(initializer), place.position, error);
+        }
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * Runs one initializer through every step, in PHPNomad's order. A
+   * false load condition ends it after step 2.
+   */
+  private async loadInitializer(init: Initializer, place: Place, eventKey: EventStrategyKey): Promise<void> {
+    if (canSetContainer(init)) {
+      init.setContainer(this.container);
+    }
+    if (hasLoadCondition(init) && !(await this.checkLoadCondition(init.shouldLoad(), place))) {
+      return;
+    }
+    if (hasClassDefinitions(init)) {
+      this.bindClassDefinitions(init.getClassDefinitions(), place);
+    }
+    if (hasEventBindings(init)) {
+      await this.bindEvents(init.getEventBindings(), place, eventKey);
+    }
+    if (hasListeners(init)) {
+      const events = await this.container.get<AttachesListeners>(eventKey as Token);
+      await this.attachListeners(events, init.getListeners(), place);
+    }
+    if (hasTaskHandlers(init)) {
+      const tasks = await this.container.get<LoaderTaskStrategy>(TASK_STRATEGY_TOKEN);
+      await this.attachTaskHandlers(tasks, init.getTaskHandlers(), place);
+    }
+    if (hasControllers(init)) {
+      const rest = await this.container.get<LoaderRestStrategy>(REST_STRATEGY_TOKEN);
+      await this.registerControllers(rest, init.getControllers(), place);
+    }
+    if (isLoadable(init)) {
+      await init.load();
+    }
+  }
+
+  /**
+   * Step 2. Awaits the answer and answers it, or throws a TypeError for
+   * anything but a boolean.
+   */
+  private async checkLoadCondition(answer: unknown, place: Place): Promise<boolean> {
+    const settled = await answer;
+    if (typeof settled !== 'boolean') {
+      throw this.shapeError('shouldLoad', `must answer a boolean, got ${describeValue(settled)}`, place);
+    }
+    return settled;
+  }
+
+  /**
+   * Step 3. Checks the whole answer, then binds each pair, or each
+   * entry of the 0.1 record, in order.
+   */
+  private bindClassDefinitions(answer: unknown, place: Place): void {
+    const container = this.container as unknown as Binds;
+
+    if (Array.isArray(answer)) {
+      for (const [index, pair] of answer.entries()) {
+        if (!Array.isArray(pair) || pair.length !== 2 || !isConstructable(pair[0])) {
+          throw this.shapeError(
+            'getClassDefinitions',
+            `entry ${index} must be a [concrete class, abstracts] pair, got ${describeValue(pair)}`,
+            place
+          );
+        }
+      }
+      for (const [concrete, abstracts] of answer as ReadonlyArray<readonly [unknown, unknown]>) {
+        container.bind(concrete, ...(Array.isArray(abstracts) ? abstracts : [abstracts]));
+      }
+      return;
+    }
+
+    if (isPlainObject(answer)) {
+      for (const [token, factory] of Object.entries(answer)) {
+        if (typeof factory !== 'function') {
+          throw this.shapeError(
+            'getClassDefinitions',
+            `record entry '${token}' must be a factory function, got ${describeValue(factory)}`,
+            place
+          );
+        }
+      }
+      for (const [token, factory] of Object.entries(answer)) {
+        container.bind(token, factory);
+      }
+      return;
+    }
+
+    throw this.shapeError(
+      'getClassDefinitions',
+      `must answer a list of [concrete, abstracts] pairs or a plain record, got ${describeValue(answer)}`,
+      place
+    );
+  }
+
+  /**
+   * Step 4. Checks the whole answer, then, in list order, resolves the
+   * action binding strategy for each pair and binds its actions, and
+   * attaches each 0.1 entry to the event strategy.
+   */
+  private async bindEvents(answer: unknown, place: Place, eventKey: EventStrategyKey): Promise<void> {
+    const plan = this.planEventBindings(answer, place);
+
+    for (const entry of plan) {
+      if (entry.kind === 'legacy') {
+        const events = await this.container.get<AttachesListeners>(eventKey as Token);
+        await events.attach(entry.eventId, entry.listener);
+        continue;
+      }
+      const actions = await this.container.get(ActionBindingStrategy);
+      const bindAction = actions.bindAction.bind(actions) as (...args: unknown[]) => unknown;
+      for (const { action, transformer } of entry.actions) {
+        if (transformer === undefined) {
+          await bindAction(entry.eventClass, action);
+        } else {
+          await bindAction(entry.eventClass, action, transformer);
+        }
+      }
+    }
+  }
+
+  /**
+   * Checks every entry of `getEventBindings()` and answers what to bind,
+   * or throws a TypeError for the first entry of the wrong shape.
+   */
+  private planEventBindings(answer: unknown, place: Place): EventBindingPlan[] {
+    if (!Array.isArray(answer)) {
+      throw this.shapeError('getEventBindings', `must answer a list, got ${describeValue(answer)}`, place);
+    }
+
+    return answer.map((entry: unknown, index): EventBindingPlan => {
+      if (Array.isArray(entry)) {
+        if (entry.length !== 2 || !isConstructable(entry[0])) {
+          throw this.shapeError(
+            'getEventBindings',
+            `entry ${index} must be an [event class, actions] pair, got ${describeValue(entry)}`,
+            place
+          );
+        }
+        const listed: unknown[] = Array.isArray(entry[1]) ? entry[1] : [entry[1]];
+        const actions = listed.map((action) => {
+          if (typeof action === 'string') {
+            return { action };
+          }
+          if (isPlainObject(action) && typeof action.action === 'string' && (action.transformer === undefined || typeof action.transformer === 'function')) {
+            return { action: action.action, transformer: action.transformer };
+          }
+          throw this.shapeError(
+            'getEventBindings',
+            `entry ${index} has an action that is neither a name nor an { action, transformer } object: ${describeValue(action)}`,
+            place
+          );
+        });
+        return { kind: 'actions', eventClass: entry[0], actions };
+      }
+
+      if (entry !== null && typeof entry === 'object') {
+        const legacy = entry as { eventId?: unknown; listener?: unknown };
+        if (typeof legacy.eventId === 'string' && typeof legacy.listener === 'function') {
+          return { kind: 'legacy', eventId: legacy.eventId, listener: legacy.listener as (event: any) => unknown };
+        }
+      }
+
+      throw this.shapeError(
+        'getEventBindings',
+        `entry ${index} must be an [event class, actions] pair or an { eventId, listener } object, got ${describeValue(entry)}`,
+        place
+      );
+    });
+  }
+
+  /**
+   * Step 5, after the event strategy is resolved. Checks the whole
+   * record, then attaches each entry under its event id, in order.
+   */
+  private async attachListeners(events: AttachesListeners, answer: unknown, place: Place): Promise<void> {
+    if (!isPlainObject(answer)) {
+      throw this.shapeError('getListeners', `must answer a plain object keyed by event id, got ${describeValue(answer)}`, place);
+    }
+
+    const plan: Array<[string, (event: any) => unknown]> = [];
+    for (const [eventId, entries] of Object.entries(answer)) {
+      for (const entry of Array.isArray(entries) ? entries : [entries]) {
+        plan.push([eventId, this.listenerFor(entry, eventId, place)]);
+      }
+    }
+
+    for (const [eventId, listener] of plan) {
+      await events.attach(eventId, listener);
+    }
+  }
+
+  /**
+   * Sorts one listener entry by the contract's two checks. A handler
+   * class becomes a listener that resolves it when the event fires. A
+   * plain function is the listener itself. A class with no `handle`
+   * method, and anything that is not a function, is a TypeError.
+   */
+  private listenerFor(entry: unknown, eventId: string, place: Place): (event: any) => unknown {
+    if (isHandlerClass(entry)) {
+      return async (event: unknown) => {
+        const handler = await this.container.get(entry);
+        await handler.handle(event);
+      };
+    }
+    if (typeof entry !== 'function') {
+      throw this.shapeError(
+        'getListeners',
+        `entry for '${eventId}' must be a handler class or a function, got ${describeValue(entry)}`,
+        place
+      );
+    }
+    if (isClassSyntax(entry)) {
+      throw this.shapeError(
+        'getListeners',
+        `entry for '${eventId}' is a class with no handle method on its prototype: ${describeValue(entry)}`,
+        place
+      );
+    }
+    return entry as (event: any) => unknown;
+  }
+
+  /**
+   * Step 6, after the task strategy is resolved. Checks the whole list,
+   * then attaches each handler class, in order, through a function that
+   * resolves it when the task runs.
+   */
+  private async attachTaskHandlers(tasks: LoaderTaskStrategy, answer: unknown, place: Place): Promise<void> {
+    if (!Array.isArray(answer)) {
+      throw this.shapeError('getTaskHandlers', `must answer a list, got ${describeValue(answer)}`, place);
+    }
+
+    const plan: Array<[unknown, abstract new (...args: any[]) => { handle(task: unknown): unknown }]> = [];
+    for (const [index, pair] of answer.entries()) {
+      if (!Array.isArray(pair) || pair.length !== 2 || !isConstructable(pair[0])) {
+        throw this.shapeError(
+          'getTaskHandlers',
+          `entry ${index} must be a [task class, handlers] pair, got ${describeValue(pair)}`,
+          place
+        );
+      }
+      for (const handler of Array.isArray(pair[1]) ? pair[1] : [pair[1]]) {
+        if (!isHandlerClass(handler)) {
+          throw this.shapeError(
+            'getTaskHandlers',
+            `entry ${index} has a handler that is not a class with a handle method on its prototype: ${describeValue(handler)}`,
+            place
+          );
+        }
+        plan.push([pair[0], handler]);
+      }
+    }
+
+    for (const [taskClass, handlerClass] of plan) {
+      await tasks.attach(taskClass as Parameters<LoaderTaskStrategy['attach']>[0], async (task: unknown) => {
+        const handler = await this.container.get(handlerClass);
+        await handler.handle(task);
+      });
+    }
+  }
+
+  /**
+   * Step 7, after the REST strategy is resolved. Checks the whole list,
+   * then registers a route getter for each controller class, in order.
+   */
+  private async registerControllers(rest: LoaderRestStrategy, answer: unknown, place: Place): Promise<void> {
+    if (!Array.isArray(answer)) {
+      throw this.shapeError('getControllers', `must answer a list, got ${describeValue(answer)}`, place);
+    }
+    for (const [index, controller] of answer.entries()) {
+      if (!isConstructable(controller)) {
+        throw this.shapeError('getControllers', `entry ${index} must be a controller class, got ${describeValue(controller)}`, place);
+      }
+    }
+
+    for (const controller of answer as ReadonlyArray<abstract new (...args: any[]) => object>) {
+      await rest.registerRoute(() => this.container.get(controller));
+    }
+  }
+
+  /**
+   * The TypeError for an answer of the wrong shape. Its message names
+   * the method, the initializer and its position.
+   */
+  private shapeError(method: string, problem: string, place: Place): TypeError {
+    return new TypeError(
+      `${method}() of ${initializerName(place.initializer)} (position ${place.position}) ${problem}`
+    );
   }
 }

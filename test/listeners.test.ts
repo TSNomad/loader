@@ -28,7 +28,7 @@ function busContainer(): { container: Container; events: InMemoryEventStrategy }
   return { container, events };
 }
 
-test.skip('a plain function listener hears its event', async () => {
+test('a plain function listener hears its event', async () => {
   const { container, events } = busContainer();
   const heard: string[] = [];
 
@@ -44,7 +44,7 @@ test.skip('a plain function listener hears its event', async () => {
   assert.deepEqual(heard, ['u1']);
 });
 
-test.skip('a list of listeners runs in list order, for each event id', async () => {
+test('a list of listeners runs in list order, for each event id', async () => {
   const { container, events } = busContainer();
   const heard: string[] = [];
 
@@ -66,7 +66,7 @@ test.skip('a list of listeners runs in list order, for each event id', async () 
   assert.deepEqual(heard, ['first', 'second', 'order']);
 });
 
-test.skip('a handler class is resolved from the container and its handle receives the event', async () => {
+test('a handler class is resolved from the container and its handle receives the event', async () => {
   const { container, events } = busContainer();
   const handled: unknown[] = [];
   class Welcome implements CanHandle<UserCreated> {
@@ -87,7 +87,7 @@ test.skip('a handler class is resolved from the container and its handle receive
   assert.deepEqual(handled, [['double', 'u1']]);
 });
 
-test.skip('a constructor function whose prototype has handle is a handler class too, resolved from the container', async () => {
+test('a constructor function whose prototype has handle is a handler class too, resolved from the container', async () => {
   const { container, events } = busContainer();
   const handled: string[] = [];
   function Es5Welcome(this: { prefix: string }) {
@@ -103,7 +103,7 @@ test.skip('a constructor function whose prototype has handle is a handler class 
   assert.deepEqual(handled, ['es5:u1']);
 });
 
-test.skip('a handler class is resolved when the event fires, so it may need a binding a later initializer makes', async () => {
+test('a handler class is resolved when the event fires, so it may need a binding a later initializer makes', async () => {
   const { container, events } = busContainer();
   const sent: string[] = [];
   class Mailer {
@@ -131,7 +131,7 @@ test.skip('a handler class is resolved when the event fires, so it may need a bi
   assert.deepEqual(sent, ['u1']);
 });
 
-test.skip('the handler is not built during load, only when its event fires', async () => {
+test('the handler is not built during load, only when its event fires', async () => {
   const { container, events } = busContainer();
   let built = 0;
   class Counted implements CanHandle<UserCreated> {
@@ -148,7 +148,7 @@ test.skip('the handler is not built during load, only when its event fires', asy
   assert.equal(built, 1);
 });
 
-test.skip("broadcast waits for an async handler's handle to settle", async () => {
+test("broadcast waits for an async handler's handle to settle", async () => {
   const { container, events } = busContainer();
   const order: string[] = [];
   class Slow implements CanHandle<UserCreated> {
@@ -165,7 +165,7 @@ test.skip("broadcast waits for an async handler's handle to settle", async () =>
   assert.deepEqual(order, ['handled', 'broadcast resolved']);
 });
 
-test.skip('a handler that cannot be resolved fails the broadcast, not the load', async () => {
+test('a handler that cannot be resolved fails the broadcast, not the load', async () => {
   const { container, events } = busContainer();
   class NeedsMailer implements CanHandle<UserCreated> {
     static readonly inject = ['Mailer'] as const;
@@ -185,7 +185,7 @@ test.skip('a handler that cannot be resolved fails the broadcast, not the load',
   });
 });
 
-test.skip('an error from handle reaches the broadcast unchanged', async () => {
+test('an error from handle reaches the broadcast unchanged', async () => {
   const { container, events } = busContainer();
   const boom = new Error('mail down');
   class Fails implements CanHandle<UserCreated> {
@@ -203,7 +203,7 @@ test.skip('an error from handle reaches the broadcast unchanged', async () => {
   });
 });
 
-test.skip('a function with a prototype but no handle method is a plain listener, called with the event', async () => {
+test('a function with a prototype but no handle method is a plain listener, called with the event', async () => {
   const { container, events } = busContainer();
   const heard: unknown[] = [];
   function legacyListener(event: UserCreated) {
@@ -216,7 +216,7 @@ test.skip('a function with a prototype but no handle method is a plain listener,
   assert.deepEqual(heard, ['u1']);
 });
 
-test.skip('a plain function is attached itself, by event id, at the default priority', async () => {
+test('a plain function is attached itself, by event id, at the default priority', async () => {
   const { container, events } = wire();
   const onUser = () => {};
   await new Bootstrapper(container, [listening(() => ({ [UserCreated.getId()]: onUser }))]).load();
@@ -227,7 +227,7 @@ test.skip('a plain function is attached itself, by event id, at the default prio
   assert.ok(events.attached[0].priority === undefined || events.attached[0].priority === 10);
 });
 
-test.skip('the strategy bound under the 0.1 string token is the one the loader uses', async () => {
+test('the strategy bound under the 0.1 string token is the one the loader uses', async () => {
   const container = new Container();
   const events = new InMemoryEventStrategy();
   container.bind('EventStrategy', () => events);
@@ -241,7 +241,7 @@ test.skip('the strategy bound under the 0.1 string token is the one the loader u
   assert.deepEqual(heard, ['heard']);
 });
 
-test.skip('the 0.1 bootstrap option reads the event strategy by the token it names', async () => {
+test('the 0.1 bootstrap option reads the event strategy by the token it names', async () => {
   const container = new Container();
   const events = new InMemoryEventStrategy();
   container.bind('Bus', () => events);
@@ -256,7 +256,7 @@ test.skip('the 0.1 bootstrap option reads the event strategy by the token it nam
   assert.equal(container.has('EventStrategy'), false);
 });
 
-test.skip('an attach that throws stops the load unchanged, and the listeners attached before it stay attached', async () => {
+test('an attach that throws stops the load unchanged, and the listeners attached before it stay attached', async () => {
   const container = new Container();
   const refusal = new Error('bus full');
   const attached: string[] = [];
@@ -274,7 +274,7 @@ test.skip('an attach that throws stops the load unchanged, and the listeners att
   assert.deepEqual(attached, ['user.created']);
 });
 
-test.skip('listeners with no event strategy bound fail the load with a LoaderException and the container error', async () => {
+test('listeners with no event strategy bound fail the load with a LoaderException and the container error', async () => {
   const container = new Container();
   class Listens {
     getListeners() {
@@ -290,7 +290,7 @@ test.skip('listeners with no event strategy bound fail the load with a LoaderExc
   });
 });
 
-test.skip('the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load', async () => {
+test('the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load', async () => {
   const container = new Container();
   let asked = 0;
   await assert.rejects(new Bootstrapper(container, [listening(() => {
@@ -300,7 +300,7 @@ test.skip('the event strategy is resolved before the record is read, as PHPNomad
   assert.equal(asked, 0);
 });
 
-test.skip('a malformed answer fails the load with a TypeError and attaches nothing from it', async () => {
+test('a malformed answer fails the load with a TypeError and attaches nothing from it', async () => {
   class Welcome implements CanHandle<UserCreated> {
     handle(): void {}
   }

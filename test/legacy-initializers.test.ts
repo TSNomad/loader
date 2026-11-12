@@ -26,7 +26,7 @@ class RegistryInit implements Event {
   }
 }
 
-test.skip('an initializer that binds the event strategy in its record form serves its own listeners and later ones', async () => {
+test('an initializer that binds the event strategy in its record form serves its own listeners and later ones', async () => {
   const container = new Container();
   const heard: string[] = [];
 
@@ -72,7 +72,7 @@ test.skip('an initializer that binds the event strategy in its record form serve
   assert.deepEqual(heard, ['core']);
 });
 
-test.skip('a 0.1 event with only an instance getId reaches a listener the loader attached by id', async () => {
+test('a 0.1 event with only an instance getId reaches a listener the loader attached by id', async () => {
   const container = new Container();
   const events = new InMemoryEventStrategy();
   container.bind('EventStrategy', () => events);

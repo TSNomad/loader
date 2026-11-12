@@ -33,7 +33,7 @@ function conditional(log: string[], name: string, shouldLoad: () => unknown) {
   });
 }
 
-test.skip('a false condition skips every step after it, and the container was set before the question', async () => {
+test('a false condition skips every step after it, and the container was set before the question', async () => {
   const { container, log } = wire();
 
   await new Bootstrapper(container, [conditional(log, 'Off', () => false)]).load();
@@ -42,7 +42,7 @@ test.skip('a false condition skips every step after it, and the container was se
   assert.equal(container.has(Store), false);
 });
 
-test.skip('a condition that resolves false skips every step after it', async () => {
+test('a condition that resolves false skips every step after it', async () => {
   const { container, log } = wire();
   const off = conditional(log, 'Off', async () => {
     await tick();
@@ -54,7 +54,7 @@ test.skip('a condition that resolves false skips every step after it', async () 
   assert.deepEqual(log, ['Off.setContainer', 'Off.shouldLoad']);
 });
 
-test.skip('a false condition skips only its own initializer, and the next one loads in full', async () => {
+test('a false condition skips only its own initializer, and the next one loads in full', async () => {
   const { container, log } = wire();
   const off = conditional(log, 'Off', () => false);
   const on = traced(log, 'On', {
@@ -76,7 +76,7 @@ test.skip('a false condition skips only its own initializer, and the next one lo
   assert.equal(container.has(Store), true);
 });
 
-test.skip('a true condition, sync or async, runs every step', async () => {
+test('a true condition, sync or async, runs every step', async () => {
   for (const shouldLoad of [() => true, async () => true]) {
     const { container, log } = wire();
     await new Bootstrapper(container, [conditional(log, 'On', shouldLoad)]).load();
@@ -102,7 +102,7 @@ test.skip('a true condition, sync or async, runs every step', async () => {
   }
 });
 
-test.skip('the condition is asked after setContainer and before the class definitions', async () => {
+test('the condition is asked after setContainer and before the class definitions', async () => {
   const { container, log } = wire();
   const seen: boolean[] = [];
   const initializer = traced(log, 'Asks', {
@@ -119,7 +119,7 @@ test.skip('the condition is asked after setContainer and before the class defini
   assert.deepEqual(seen, [true, false]);
 });
 
-test.skip('an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step', async () => {
+test('an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step', async () => {
   for (const answer of [undefined, null, 1, 0, 'yes', '', {}, Promise.resolve(undefined), Promise.resolve('true')]) {
     const { container, log } = wire();
     const initializer = conditional(log, 'Vague', () => answer);
@@ -138,7 +138,7 @@ test.skip('an answer that is not a boolean fails the load with a TypeError namin
   }
 });
 
-test.skip('a condition that throws stops the load with its own error, unchanged', async () => {
+test('a condition that throws stops the load with its own error, unchanged', async () => {
   const { container, log } = wire();
   const boom = new Error('settings unreadable');
   const initializer = conditional(log, 'Throws', () => {

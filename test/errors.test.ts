@@ -30,7 +30,7 @@ test("LoaderException carries the initializer, its position and the cause, and i
   assert.equal(new LoaderException('x', 1, 'plain').cause, 'plain');
 });
 
-test.skip('a DiException thrown from load() becomes a LoaderException with it as the cause', async () => {
+test('a DiException thrown from load() becomes a LoaderException with it as the cause', async () => {
   class Warmup {
     container: Container | undefined = undefined;
     setContainer(container: Container): this {
@@ -53,7 +53,7 @@ test.skip('a DiException thrown from load() becomes a LoaderException with it as
   });
 });
 
-test.skip('every DiException subclass is wrapped, and the cause is the same object', async () => {
+test('every DiException subclass is wrapped, and the cause is the same object', async () => {
   const causes = [
     new DiException('plain'),
     new DuplicateBindingError('Store'),
@@ -75,7 +75,7 @@ test.skip('every DiException subclass is wrapped, and the cause is the same obje
   }
 });
 
-test.skip('an error that is not a DiException passes through unchanged, from every method an initializer has', async () => {
+test('an error that is not a DiException passes through unchanged, from every method an initializer has', async () => {
   const methods = ['setContainer', 'shouldLoad', 'getClassDefinitions', 'getEventBindings', 'getListeners', 'getTaskHandlers', 'getControllers', 'load'];
   for (const method of methods) {
     const boom = new Error(`${method} broke`);
@@ -89,7 +89,7 @@ test.skip('an error that is not a DiException passes through unchanged, from eve
   }
 });
 
-test.skip('a rejected promise from load() that is not a DiException passes through unchanged', async () => {
+test('a rejected promise from load() that is not a DiException passes through unchanged', async () => {
   const boom = new RangeError('bad port');
   const container = new Container();
   await assert.rejects(
@@ -98,7 +98,7 @@ test.skip('a rejected promise from load() that is not a DiException passes throu
   );
 });
 
-test.skip('the load stops at the first failing initializer, and later initializers never start', async () => {
+test('the load stops at the first failing initializer, and later initializers never start', async () => {
   const { container, log } = wire();
   const first = traced(log, 'First', { setContainer: true, load: () => {} });
   const failing = traced(log, 'Failing', {
@@ -118,7 +118,7 @@ test.skip('the load stops at the first failing initializer, and later initialize
   assert.deepEqual(log, ['First.setContainer', 'First.load', 'Failing.setContainer', 'Failing.load']);
 });
 
-test.skip('load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding', async () => {
+test('load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding', async () => {
   class Store {}
   const log: string[] = [];
   const container = new Container();
@@ -139,7 +139,7 @@ test.skip('load() runs every step again when called again, so a second load into
   assert.deepEqual(log, ['Plain.load', 'Binds.getClassDefinitions']);
 });
 
-test.skip('a failed load is not rolled back: what earlier initializers and earlier steps registered stays', async () => {
+test('a failed load is not rolled back: what earlier initializers and earlier steps registered stays', async () => {
   class Store {}
   class Cache {}
   const container = new Container();
@@ -156,7 +156,7 @@ test.skip('a failed load is not rolled back: what earlier initializers and earli
   assert.equal(container.has('cache'), true);
 });
 
-test.skip('a plain object initializer is named anonymous initializer, with its position', async () => {
+test('a plain object initializer is named anonymous initializer, with its position', async () => {
   const container = new Container();
   await assert.rejects(
     new Bootstrapper(container, [
@@ -176,7 +176,7 @@ test.skip('a plain object initializer is named anonymous initializer, with its p
   );
 });
 
-test.skip('a promise a strategy returns is awaited, so its rejection stops the load unchanged', async () => {
+test('a promise a strategy returns is awaited, so its rejection stops the load unchanged', async () => {
   class Handler {
     handle(): void {}
   }
@@ -206,7 +206,7 @@ test.skip('a promise a strategy returns is awaited, so its rejection stops the l
   }
 });
 
-test.skip('an async attach on the event strategy is awaited too', async () => {
+test('an async attach on the event strategy is awaited too', async () => {
   const { container, events, log } = wire();
   const boom = new Error('attach failed');
   events.attach = (() => Promise.reject(boom)) as any;

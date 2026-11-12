@@ -38,14 +38,14 @@ function definitions(answer: () => unknown): any {
   return { getClassDefinitions: answer };
 }
 
-test.skip('a pair binds the concrete to its abstract', async () => {
+test('a pair binds the concrete to its abstract', async () => {
   const container = new Container();
   await new Bootstrapper(container, [definitions(() => [[MemoryStore, Store]])]).load();
 
   assert.ok((await container.get(Store)) instanceof MemoryStore);
 });
 
-test.skip('a pair with a list of abstracts binds them all to one shared instance', async () => {
+test('a pair with a list of abstracts binds them all to one shared instance', async () => {
   const container = new Container();
   await new Bootstrapper(container, [definitions(() => [[MemoryStore, [Store, Cache, 'store']]])]).load();
 
@@ -55,7 +55,7 @@ test.skip('a pair with a list of abstracts binds them all to one shared instance
   assert.equal(await container.get('store'), store);
 });
 
-test.skip('a pair binds to a typed token, and the concrete is autowired through its inject list', async () => {
+test('a pair binds to a typed token, and the concrete is autowired through its inject list', async () => {
   const container = new Container();
   await new Bootstrapper(container, [
     definitions(() => [
@@ -70,7 +70,7 @@ test.skip('a pair binds to a typed token, and the concrete is autowired through 
   assert.ok(mailer.store instanceof MemoryStore);
 });
 
-test.skip('the 0.1 record form binds each token to its factory, cached as 0.1 did', async () => {
+test('the 0.1 record form binds each token to its factory, cached as 0.1 did', async () => {
   const container = new Container();
   let runs = 0;
   await new Bootstrapper(container, [
@@ -89,7 +89,7 @@ test.skip('the 0.1 record form binds each token to its factory, cached as 0.1 di
   assert.equal(await container.get('Value'), 42);
 });
 
-test.skip('every pair of every initializer is bound, in list order', async () => {
+test('every pair of every initializer is bound, in list order', async () => {
   const container = new Container();
   const order: unknown[] = [];
   const bind = container.bind.bind(container) as (...args: unknown[]) => unknown;
@@ -109,13 +109,13 @@ test.skip('every pair of every initializer is bound, in list order', async () =>
   assert.deepEqual(order, [MemoryStore, SystemClock, Mailer]);
 });
 
-test.skip('an empty list binds nothing and loads', async () => {
+test('an empty list binds nothing and loads', async () => {
   const container = new Container();
   await new Bootstrapper(container, [definitions(() => [])]).load();
   assert.deepEqual(container.getTokens(), []);
 });
 
-test.skip('a duplicate binding fails the load with a LoaderException naming the second initializer', async () => {
+test('a duplicate binding fails the load with a LoaderException naming the second initializer', async () => {
   class CoreInitializer {
     getClassDefinitions() {
       return [[MemoryStore, Store]] as const;
@@ -140,7 +140,7 @@ test.skip('a duplicate binding fails the load with a LoaderException naming the 
   );
 });
 
-test.skip('a pair with no abstract fails the load with the container error as the cause', async () => {
+test('a pair with no abstract fails the load with the container error as the cause', async () => {
   const container = new Container();
   await assert.rejects(
     new Bootstrapper(container, [definitions(() => [[MemoryStore, []]])]).load(),
@@ -148,7 +148,7 @@ test.skip('a pair with no abstract fails the load with the container error as th
   );
 });
 
-test.skip('an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing', async () => {
+test('an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing', async () => {
   const malformed: Array<[string, unknown]> = [
     ['undefined', undefined],
     ['null', null],

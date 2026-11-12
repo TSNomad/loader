@@ -192,30 +192,21 @@ export function canSetContainer(init: Initializer): init is SetsContainer {
 
 /**
  * Type guard for HasLoadCondition.
- *
- * Stub: packet P1 implements it.
  */
 export function hasLoadCondition(init: Initializer): init is HasLoadCondition {
-  void init;
-  return false;
+  return typeof (init as HasLoadCondition).shouldLoad === 'function';
 }
 
 /**
  * Type guard for HasTaskHandlers.
- *
- * Stub: packet P1 implements it.
  */
 export function hasTaskHandlers(init: Initializer): init is HasTaskHandlers {
-  void init;
-  return false;
+  return typeof (init as HasTaskHandlers).getTaskHandlers === 'function';
 }
 
 /**
  * Type guard for HasControllers.
- *
- * Stub: packet P1 implements it.
  */
 export function hasControllers(init: Initializer): init is HasControllers {
-  void init;
-  return false;
+  return typeof (init as HasControllers).getControllers === 'function';
 }
