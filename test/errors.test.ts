@@ -1,0 +1,180 @@
+/**
+ * Acceptance tests, integration shape: which errors become a
+ * LoaderException and which pass through, and that the load stops at the
+ * first failing initializer. PHPNomad's loader wraps only a
+ * `DiException`, with `'Failed to load ' . get_class($initializer)`.
+ *
+ * Packet P1 removes each `skip`. The LoaderException class itself is
+ * final and its first test already runs.
+ */
+
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { AutowireError, CircularDependencyError, Container, DiException, DuplicateBindingError } from '@tsnomad/di-container';
+import { Bootstrapper } from '../dist/Bootstrapper.js';
+import { LoaderException } from '../dist/LoaderException.js';
+import { SendSale, traced, UserCreated, wire } from './fixtures.ts';
+
+test('LoaderException carries the initializer, its position and the cause, and its message reads in one line', () => {
+  const cause = new DiException("Token 'Mailer' is not bound. Available: none");
+  const error = new LoaderException('ServiceInitializer', 2, cause);
+
+  assert.ok(error instanceof Error);
+  assert.equal(error.name, 'LoaderException');
+  assert.equal(error.initializer, 'ServiceInitializer');
+  assert.equal(error.position, 2);
+  assert.equal(error.cause, cause);
+  assert.equal(error.message, "Failed to load ServiceInitializer (position 2): Token 'Mailer' is not bound. Available: none");
+  assert.equal(new LoaderException('x', 1, 'plain').message, 'Failed to load x (position 1): plain');
+});
+
+test.skip('a DiException thrown from load() becomes a LoaderException with it as the cause', async () => {
+  class Warmup {
+    container: Container | undefined = undefined;
+    setContainer(container: Container): this {
+      this.container = container;
+      return this;
+    }
+    async load(): Promise<void> {
+      await this.container?.get('NotBound');
+    }
+  }
+  const container = new Container();
+
+  await assert.rejects(new Bootstrapper(container, [new Warmup()]).load(), (error: unknown) => {
+    assert.ok(error instanceof LoaderException);
+    assert.equal(error.initializer, 'Warmup');
+    assert.equal(error.position, 1);
+    assert.ok(error.cause instanceof DiException);
+    assert.match(error.message, /^Failed to load Warmup \(position 1\): /);
+    return true;
+  });
+});
+
+test.skip('every DiException subclass is wrapped, and the cause is the same object', async () => {
+  const causes = [
+    new DiException('plain'),
+    new DuplicateBindingError('Store'),
+    new AutowireError('Mailer', 'no-inject'),
+    new CircularDependencyError(['Left', 'Right', 'Left']),
+  ];
+  for (const cause of causes) {
+    const container = new Container();
+    await assert.rejects(
+      new Bootstrapper(container, [
+        {
+          load: () => {
+            throw cause;
+          },
+        },
+      ]).load(),
+      (error: unknown) => error instanceof LoaderException && error.cause === cause
+    );
+  }
+});
+
+test.skip('an error that is not a DiException passes through unchanged, from every method an initializer has', async () => {
+  const methods = ['setContainer', 'shouldLoad', 'getClassDefinitions', 'getEventBindings', 'getListeners', 'getTaskHandlers', 'getControllers', 'load'];
+  for (const method of methods) {
+    const boom = new Error(`${method} broke`);
+    const { container } = wire();
+    const initializer: Record<string, unknown> = {
+      [method]: () => {
+        throw boom;
+      },
+    };
+    await assert.rejects(new Bootstrapper(container, [initializer as any]).load(), (error) => error === boom, method);
+  }
+});
+
+test.skip('a rejected promise from load() that is not a DiException passes through unchanged', async () => {
+  const boom = new RangeError('bad port');
+  const container = new Container();
+  await assert.rejects(
+    new Bootstrapper(container, [{ load: async () => Promise.reject(boom) }]).load(),
+    (error) => error === boom
+  );
+});
+
+test.skip('the load stops at the first failing initializer, and later initializers never start', async () => {
+  const { container, log } = wire();
+  const first = traced(log, 'First', { setContainer: true, load: () => {} });
+  const failing = traced(log, 'Failing', {
+    setContainer: true,
+    load: () => {
+      throw new DiException('missing');
+    },
+  });
+  const after = traced(log, 'After', { setContainer: true, load: () => {} });
+
+  await assert.rejects(new Bootstrapper(container, [first, failing, after]).load(), (error: unknown) => {
+    assert.ok(error instanceof LoaderException);
+    assert.equal(error.initializer, 'Failing');
+    assert.equal(error.position, 2);
+    return true;
+  });
+  assert.deepEqual(log, ['First.setContainer', 'First.load', 'Failing.setContainer', 'Failing.load']);
+});
+
+test.skip('a plain object initializer is named anonymous initializer, with its position', async () => {
+  const container = new Container();
+  await assert.rejects(
+    new Bootstrapper(container, [
+      {},
+      {
+        load: () => {
+          throw new DiException('missing');
+        },
+      },
+    ]).load(),
+    (error: unknown) => {
+      assert.ok(error instanceof LoaderException);
+      assert.equal(error.initializer, 'anonymous initializer');
+      assert.equal(error.position, 2);
+      return true;
+    }
+  );
+});
+
+test.skip('a promise a strategy returns is awaited, so its rejection stops the load unchanged', async () => {
+  class Handler {
+    handle(): void {}
+  }
+  class Controller {}
+  const cases: Array<[string, any, (wiring: ReturnType<typeof wire>, error: Error) => void]> = [
+    ['bindAction', { getEventBindings: () => [[UserCreated, 'customer.created']] }, (w, error) => {
+      w.actions.answer = Promise.reject(error);
+    }],
+    ['task attach', { getTaskHandlers: () => [[SendSale, Handler]] }, (w, error) => {
+      w.tasks.answer = Promise.reject(error);
+    }],
+    ['registerRoute', { getControllers: () => [Controller] }, (w, error) => {
+      w.rest.answer = Promise.reject(error);
+    }],
+  ];
+  for (const [label, initializer, arrange] of cases) {
+    const wiring = wire();
+    const boom = new Error(`${label} failed`);
+    arrange(wiring, boom);
+    (wiring.actions.answer as Promise<void> | undefined)?.catch(() => {});
+    (wiring.tasks.answer as Promise<void> | undefined)?.catch(() => {});
+    (wiring.rest.answer as Promise<void> | undefined)?.catch(() => {});
+    const after = traced(wiring.log, 'After', { setContainer: true });
+
+    await assert.rejects(new Bootstrapper(wiring.container, [initializer, after]).load(), (error) => error === boom, label);
+    assert.equal(wiring.log.includes('After.setContainer'), false, label);
+  }
+});
+
+test.skip('an async attach on the event strategy is awaited too', async () => {
+  const { container, events, log } = wire();
+  const boom = new Error('attach failed');
+  events.attach = (() => Promise.reject(boom)) as any;
+  const after = traced(log, 'After', { setContainer: true });
+
+  await assert.rejects(
+    new Bootstrapper(container, [{ getListeners: () => ({ 'user.created': () => {} }) } as any, after]).load(),
+    (error) => error === boom
+  );
+  assert.equal(log.includes('After.setContainer'), false);
+});

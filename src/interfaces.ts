@@ -1,140 +1,157 @@
 /**
  * TSNomad Bootstrap Interfaces
  *
- * Interfaces for initializers that configure the application during bootstrap.
- * Following the PHPNomad pattern where modules declare their bindings and listeners.
+ * The initializer interfaces PHPNomad's loader reads, and the type
+ * guards the bootstrapper uses to tell which ones an initializer
+ * implements. An initializer implements any subset of them.
+ *
+ * PHPNomad spreads these over several packages: `HasClassDefinitions`,
+ * `HasLoadCondition` and `Loadable` live in phpnomad/loader,
+ * `CanSetContainer` in phpnomad/di, `HasListeners` and
+ * `HasEventBindings` in phpnomad/event, `HasTaskHandlers` in
+ * phpnomad/tasks and `HasControllers` in phpnomad/rest. This file
+ * re-exports the first two groups from their TS Nomad packages and
+ * declares the task and controller shapes in `./ports.ts`, because
+ * @tsnomad/tasks and @tsnomad/rest do not exist yet.
  */
 
-import type { Token, Factory, Container } from '@tsnomad/di-container';
-import type { Listener, EventBinding } from '@tsnomad/event';
+import type { AnyAbstract, Constructor, Container, Factory, Token } from '@tsnomad/di-container';
+import type { EventBinding, EventBindingDefinition, HasEventBindings, HasListeners } from '@tsnomad/event';
+import type { ControllerClass, HasControllers, HasTaskHandlers, TaskHandlerDefinition } from './ports.js';
 
 /**
- * Provides class definitions for the DI container.
+ * One class definition: a concrete class and the abstract, or the
+ * abstracts, it is bound to. The loader passes each pair to
+ * `container.bind(concrete, ...abstracts)`, so every abstract in one
+ * pair shares one instance.
  *
- * Implement this to register services in the container:
+ * Where this differs from PHPNomad: PHP returns
+ * `[Concrete::class => Abstract::class]`, keyed by the concrete. A
+ * TypeScript object key cannot be a class, so a definition is a pair.
+ * The container's `bind` checks a concrete against its abstracts at
+ * compile time, and a list of pairs cannot carry that check pair by
+ * pair, so a concrete that does not fit its abstract compiles here.
+ */
+export type ClassDefinition = readonly [
+  concrete: Constructor<object>,
+  abstracts: AnyAbstract | readonly AnyAbstract[],
+];
+
+/**
+ * The 0.1 form of class definitions: a record from a token to a
+ * factory, bound with the container's 0.1 `bind(token, factory)`, which
+ * caches the factory's result.
+ *
+ * @deprecated Return `ClassDefinition` pairs, and bind factories in
+ * `load()` with `bindFactory` where a class cannot be autowired.
+ */
+export type LegacyClassDefinitions = Record<Token, Factory<unknown>>;
+
+/**
+ * PHPNomad's `PHPNomad\Loader\Interfaces\HasClassDefinitions`.
+ *
+ * @example
  * ```typescript
- * class MyInitializer implements HasClassDefinitions {
+ * class ConnectInitializer implements HasClassDefinitions {
  *   getClassDefinitions() {
- *     return {
- *       'Logger': () => new ConsoleLogger(),
- *       'Database': async () => await connectDb(),
- *     };
+ *     return [
+ *       [MemoryConnectionStore, ConnectionStore],
+ *       [ConsoleLogger, [LoggerStrategy, ConsoleLogger]],
+ *     ] as const;
  *   }
  * }
  * ```
  */
 export interface HasClassDefinitions {
   /**
-   * Returns bindings to register in the container.
-   * Keys are tokens, values are factory functions.
+   * Returns the class definitions to bind, as a list of pairs, or a
+   * plain object in the 0.1 record form.
    */
-  getClassDefinitions(): Record<Token, Factory<unknown>>;
+  getClassDefinitions(): readonly ClassDefinition[] | LegacyClassDefinitions;
 }
 
 /**
- * Provides event listeners.
+ * PHPNomad's `PHPNomad\Loader\Interfaces\HasLoadCondition`. The loader
+ * asks right after it hands the initializer the container, and skips
+ * every later step for this initializer when the answer is false.
  *
- * Implement this to register event handlers:
- * ```typescript
- * class MyInitializer implements HasListeners {
- *   getListeners() {
- *     return {
- *       'user.created': (event) => console.log('User created'),
- *       'user.deleted': [onDelete, cleanupFiles],
- *     };
- *   }
- * }
- * ```
+ * Where this differs from PHPNomad: the answer may be a promise, since
+ * a Node condition often needs a read, such as a stored setting. It
+ * must be a boolean. Any other answer fails the load with a
+ * LoaderException, so a condition that forgets to return does not
+ * quietly skip the initializer.
  */
-export interface HasListeners {
-  /**
-   * Returns listeners to register.
-   * Keys are event IDs, values are listeners or arrays of listeners.
-   */
-  getListeners(): Record<string, Listener<any> | Listener<any>[]>;
+export interface HasLoadCondition {
+  shouldLoad(): boolean | Promise<boolean>;
 }
 
 /**
- * Provides event bindings (alternative to HasListeners).
+ * PHPNomad's `PHPNomad\Loader\Interfaces\Loadable`. The loader calls
+ * `load()` last, after every other step for the same initializer, and
+ * before it starts the next initializer.
  *
- * Use this when you need more control over binding configuration:
- * ```typescript
- * class MyInitializer implements HasEventBindings {
- *   getEventBindings() {
- *     return [
- *       { eventId: 'user.created', listener: this.onUserCreated },
- *     ];
- *   }
- * }
- * ```
- */
-export interface HasEventBindings {
-  /**
-   * Returns event bindings to register.
-   */
-  getEventBindings(): EventBinding[];
-}
-
-/**
- * Runs custom initialization logic after binding registration.
- *
- * Use this for setup that needs to happen after the container is populated
- * but before the application starts:
- * ```typescript
- * class MyInitializer implements Loadable {
- *   async load() {
- *     await this.warmCache();
- *     await this.validateConfig();
- *   }
- * }
- * ```
+ * Where this differs from PHPNomad: `load()` may return a promise, and
+ * the loader waits for it before going on.
  */
 export interface Loadable {
-  /**
-   * Called after all bindings and listeners are registered.
-   * Can be async for setup that requires I/O.
-   */
   load(): void | Promise<void>;
 }
 
 /**
- * Receives the container instance.
- *
- * Implement this if your initializer needs access to the container:
- * ```typescript
- * class MyInitializer implements CanSetContainer {
- *   private container!: Container;
- *
- *   setContainer(container: Container) {
- *     this.container = container;
- *   }
- * }
- * ```
+ * PHPNomad's `PHPNomad\Di\Interfaces\CanSetContainer`, which lives in
+ * @tsnomad/di-container: `setContainer(container): this`.
  */
-export interface CanSetContainer {
-  /**
-   * Called with the container instance before other methods.
-   */
-  setContainer(container: Container): void;
+export { CanSetContainer } from '@tsnomad/di-container';
+
+/**
+ * PHPNomad's `PHPNomad\Events\Interfaces\HasListeners` and
+ * `HasEventBindings`, which live in @tsnomad/event.
+ */
+export type { HasListeners, HasEventBindings } from '@tsnomad/event';
+
+export type {
+  TaskClass,
+  CanHandleTask,
+  TaskHandlerClass,
+  TaskHandlerDefinition,
+  HasTaskHandlers,
+  ControllerClass,
+  HasControllers,
+} from './ports.js';
+
+/**
+ * What the bootstrapper accepts as one initializer: an object that
+ * implements any subset of the interfaces above. Each method is
+ * optional, and the bootstrapper checks for each one by name.
+ *
+ * `setContainer` takes the concrete `Container` and may return
+ * anything, so a 0.1 initializer whose `setContainer` returns nothing
+ * still fits. `getEventBindings` may also return the 0.1
+ * `{ eventId, listener }` objects, which load as plain listeners.
+ */
+export interface Initializer {
+  setContainer?(container: Container): unknown;
+  shouldLoad?(): boolean | Promise<boolean>;
+  getClassDefinitions?(): readonly ClassDefinition[] | LegacyClassDefinitions;
+  getEventBindings?(): readonly (EventBindingDefinition | EventBinding)[];
+  getListeners?(): ReturnType<HasListeners['getListeners']>;
+  getTaskHandlers?(): readonly TaskHandlerDefinition[];
+  getControllers?(): readonly ControllerClass[];
+  load?(): void | Promise<void>;
 }
 
 /**
- * Combined type for initializers that can implement any subset of interfaces.
+ * The 0.1 shape of `CanSetContainer`, kept so the guard below keeps its
+ * 0.1 type.
  */
-export type Initializer = Partial<
-  HasClassDefinitions &
-    HasListeners &
-    HasEventBindings &
-    Loadable &
-    CanSetContainer
->;
+interface SetsContainer {
+  setContainer(container: Container): unknown;
+}
 
 /**
  * Type guard for HasClassDefinitions.
  */
-export function hasClassDefinitions(
-  init: Initializer
-): init is HasClassDefinitions {
+export function hasClassDefinitions(init: Initializer): init is HasClassDefinitions {
   return typeof (init as HasClassDefinitions).getClassDefinitions === 'function';
 }
 
@@ -146,9 +163,12 @@ export function hasListeners(init: Initializer): init is HasListeners {
 }
 
 /**
- * Type guard for HasEventBindings.
+ * Type guard for HasEventBindings, in either the PHPNomad pair form or
+ * the 0.1 object form.
  */
-export function hasEventBindings(init: Initializer): init is HasEventBindings {
+export function hasEventBindings(
+  init: Initializer
+): init is { getEventBindings(): readonly (EventBindingDefinition | EventBinding)[] } {
   return typeof (init as HasEventBindings).getEventBindings === 'function';
 }
 
@@ -162,6 +182,36 @@ export function isLoadable(init: Initializer): init is Loadable {
 /**
  * Type guard for CanSetContainer.
  */
-export function canSetContainer(init: Initializer): init is CanSetContainer {
-  return typeof (init as CanSetContainer).setContainer === 'function';
+export function canSetContainer(init: Initializer): init is SetsContainer {
+  return typeof (init as SetsContainer).setContainer === 'function';
+}
+
+/**
+ * Type guard for HasLoadCondition.
+ *
+ * Stub: packet P1 implements it.
+ */
+export function hasLoadCondition(init: Initializer): init is HasLoadCondition {
+  void init;
+  return false;
+}
+
+/**
+ * Type guard for HasTaskHandlers.
+ *
+ * Stub: packet P1 implements it.
+ */
+export function hasTaskHandlers(init: Initializer): init is HasTaskHandlers {
+  void init;
+  return false;
+}
+
+/**
+ * Type guard for HasControllers.
+ *
+ * Stub: packet P1 implements it.
+ */
+export function hasControllers(init: Initializer): init is HasControllers {
+  void init;
+  return false;
 }
