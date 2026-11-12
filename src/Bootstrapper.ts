@@ -32,7 +32,10 @@
  *    first, then each entry is attached to it under its event id. A
  *    handler class is attached through a listener that resolves the
  *    class from the container when the event fires and calls its
- *    `handle(event)`. A plain function is attached as it is.
+ *    `handle(event)`. A plain function is attached as it is. An entry
+ *    is a handler class when its prototype has a `handle` function, or
+ *    else when its source text starts with `class`. A class with no
+ *    `handle` on its prototype is a wrong shape.
  * 6. `getTaskHandlers()`: the task strategy, at the token
  *    'TaskStrategy', is resolved first, then each handler class is
  *    attached to it through a function that resolves the class when the
@@ -53,6 +56,10 @@
  * shape of a step's whole answer before it binds or attaches anything
  * from it, so a malformed answer registers nothing from that step.
  *
+ * A failed load is not rolled back. What earlier initializers and
+ * earlier entries registered stays registered, including the entries
+ * attached before a strategy threw partway through a list.
+ *
  * `load()` does not remember an earlier call. Calling it again runs
  * every step again, so a second load into the same container fails at
  * the first binding the container already holds.
@@ -60,8 +67,8 @@
  * Errors:
  * - A `DiException` thrown by any step, including one thrown from
  *   `load()`, stops the load and rejects with a `LoaderException`
- *   naming the initializer, with the `DiException` as its cause, as in
- *   PHPNomad.
+ *   naming the initializer, with the `DiException` as its cause and
+ *   the code 500, as in PHPNomad.
  * - An answer of the wrong shape rejects with a `TypeError` whose
  *   message names the method, the initializer and its position. It is
  *   not wrapped, as PHP's own `TypeError` for a wrong return type is

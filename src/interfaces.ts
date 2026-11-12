@@ -77,9 +77,13 @@ export interface HasClassDefinitions {
  *
  * Where this differs from PHPNomad: the answer may be a promise, since
  * a Node condition often needs a read, such as a stored setting. It
- * must be a boolean. Any other answer fails the load with a
- * LoaderException, so a condition that forgets to return does not
- * quietly skip the initializer.
+ * must be a boolean. Any other answer fails the load with a TypeError
+ * naming the initializer, so a condition that forgets to return does
+ * not quietly skip it. PHP without strict types turns a scalar answer
+ * into a boolean and throws only for null, arrays and objects, so this
+ * check is stricter than PHPNomad's. TypeScript does not force that,
+ * and it is an open gap under TS Nomad Alignment With PHPNomad
+ * (Charter 5012, https://navigator.novatori.us/r/charter/5012).
  */
 export interface HasLoadCondition {
   shouldLoad(): boolean | Promise<boolean>;

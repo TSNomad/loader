@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mutation harness for the acceptance proof (slice 6 and later).
+"""Mutation harness for the acceptance proof that each test is a contract.
 
 Usage: mutate.py <repo-dir> <mutations.py> [<test-dir>]
 

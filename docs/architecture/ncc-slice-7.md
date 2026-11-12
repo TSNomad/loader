@@ -49,16 +49,22 @@ The steps, for each initializer:
 4. `getEventBindings()`. For each `[EventClass, actions]` pair the
    bootstrapper resolves the `ActionBindingStrategy` and makes one
    `bindAction` call per action. A string action passes alone. An
-   `{ action, transformer }` object passes both. A 0.1
-   `{ eventId, listener }` entry is attached to the `EventStrategy` as
-   a plain listener.
+   `{ action, transformer }` object passes both. The bootstrapper
+   attaches a 0.1 `{ eventId, listener }` entry to the `EventStrategy`
+   as a plain listener.
 5. `getListeners()`. The bootstrapper resolves the `EventStrategy`,
-   then attaches each entry under its event id. A handler class, a
-   function whose prototype has a `handle` method, is attached through
-   a listener that resolves the class from the container when the
-   event fires and calls `handle(event)`. Any other function is
-   attached as it is, at the default priority. A class with no `handle`
-   method is a wrong shape.
+   then attaches each entry under its event id. It sorts each entry by
+   two checks, in this order:
+   - A function whose `prototype.handle` is a function is a handler
+     class, whether written with `class` or as an ES5 constructor. The
+     bootstrapper attaches a listener that resolves the class from the
+     container when the event fires and calls `handle(event)`.
+   - A function whose source, read with `Function.prototype.toString`,
+     starts with `class` is a class with no `handle` method, a wrong
+     shape. That covers a class whose `handle` is an instance field,
+     since a field is not on the prototype.
+   - Any other function is a plain listener, attached as it is, at the
+     default priority.
 6. `getTaskHandlers()`. The bootstrapper resolves the task strategy,
    then attaches each `[TaskClass, Handler | Handler[]]` pair as
    `attach(TaskClass, task => container.get(Handler).then(h =>
@@ -71,7 +77,11 @@ The steps, for each initializer:
 
 Steps 5 to 7 resolve their strategy as soon as the initializer has the
 method, before they read the list, as PHPNomad does. An initializer
-with the method needs the strategy bound even when its list is empty.
+with the method needs the strategy bound even when its list is empty,
+and with no strategy bound the load fails before the method runs, so a
+missing strategy is reported ahead of a malformed answer. A task
+handler and a controller must be classes, with a prototype, and a task
+handler's prototype must have `handle`.
 Step 4 resolves its strategy per pair, also as PHPNomad does, so an
 empty list needs none. The bootstrapper reads `EventStrategy` and
 `ActionBindingStrategy` by the event package's tokens, and the task and
@@ -79,11 +89,15 @@ REST strategies by the string tokens `'TaskStrategy'` and
 `'RestStrategy'`. It checks the shape of a step's whole answer before
 it binds or attaches anything, so a malformed answer registers nothing
 from that step. It awaits a strategy call's promise and lets its errors
-pass through.
+pass through. A strategy that throws on one entry stops the step there,
+and the entries it took before stay registered.
 
-`load()` does not remember an earlier call. Calling it again runs every
-step again, so a second load into the same container fails at the first
-binding the container already holds.
+A failed load is not rolled back. What earlier initializers and earlier
+steps registered stays in the container and the strategies. `load()`
+does not remember an earlier call either. Calling it again runs every
+step again, so a retry into the same container fails at the first
+binding the container already holds. To recover, build a new container
+and load into it.
 
 `HasLoadCondition` is new. `HasEventBindings`, `HasTaskHandlers` and
 `HasControllers` are new as PHPNomad shapes. `HasListeners` and
@@ -134,7 +148,7 @@ names.
 - The constructor takes one array, `new Bootstrapper(container, [a,
   b])`, as well as separate arguments.
 - `bootstrap(options)` runs `load()` and reads the event strategy by
-  `options.eventStrategyToken` when given. It is deprecated, as are
+  `options.eventStrategyToken` when given. The package deprecates it, as it does
   `EVENT_STRATEGY_TOKEN` and `BootstrapOptions`.
 - The record form of class definitions, and plain functions as
   listeners.
@@ -168,12 +182,14 @@ consumers, and its fix patches carry only these changes.
 
 ## Where this differs from PHPNomad
 
+TypeScript or a missing package forces these:
+
 - `load()` is async and awaits each step, `shouldLoad()` and the
   initializer's own `load()` included. JavaScript factories and
   listeners may be async, so the steps must wait.
 - PHP's return types reject a wrong answer at run time. TypeScript's
   types are gone at run time, so the bootstrapper checks each answer
-  itself and throws the `TypeError` PHP would.
+  itself and throws a `TypeError`, as PHP does.
 - A class definition is a pair, because a TypeScript object key cannot
   be a class. A list of pairs cannot carry the container's
   concrete-to-abstract check pair by pair, so a concrete that does not
@@ -186,25 +202,44 @@ consumers, and its fix patches carry only these changes.
   its package exists.
   [TS Nomad Mirrors PHPNomad (KB 854)](https://navigator.novatori.us/r/kb/854)
   leaves open whether facades belong in TS Nomad at all.
-- A listener may be a plain function, the 0.1 form. PHPNomad's
-  listeners are always handler classes.
-- `LoaderException` takes the initializer's name, its position and the
-  cause, and has no error code. PHP's takes a message, the code 500 and
-  the previous exception. The message is the same.
 - The task and REST strategies are read by string tokens until their
   packages exist.
-- The constructor also takes the initializers as one array, the 0.1
-  form.
 
-## Decisions
+TypeScript does not force the rest. They are open gaps under
+[TS Nomad Alignment With PHPNomad (Charter 5012)](https://navigator.novatori.us/r/charter/5012).
+The 0.1 forms stay because the five consumers use them, and dropping
+them breaks those consumers, which Charter 5012 sends to Alex.
 
-Each call made for this slice is in the build's assumptions log, A220
-to A239, which lives in the private run folder. The ones a reader of
-this repository needs are above: the per-initializer order with
-`setContainer` before `shouldLoad`, strategies resolved where PHPNomad
-resolves them, handler classes resolved on use, wrong shapes as
-unwrapped `TypeError`s, and the 0.1 forms kept for the five consumers.
-The package version stays 0.1.0 on this branch. The version call
+- A listener may be a plain function, the 0.1 form. PHPNomad's
+  listeners are always handler classes.
+- `getClassDefinitions()` may answer the 0.1 `{ token: factory }`
+  record.
+- `getEventBindings()` may hold 0.1 `{ eventId, listener }` entries,
+  which go to the `EventStrategy` rather than the
+  `ActionBindingStrategy`.
+- The constructor also takes the initializers as one array, and the
+  deprecated `bootstrap(options)` stays beside `load()`.
+- `shouldLoad()` must answer a boolean. PHP without strict types turns
+  a scalar answer into a boolean and throws only for null, arrays and
+  objects, so this check is stricter.
+- `LoaderException` takes the initializer's name, its position and the
+  cause, and builds PHPNomad's message from them. PHP's takes a
+  message, the code and the previous exception. The code is 500 in
+  both.
+
+## Dependencies
+
+The loader depends on di-container and event at
+`#feat/node-commerce-connectors`, the build's integration branch, so
+its tests run against the slice 6 container and event code. Both refs
+move to a release tag at the merge to main. An `overrides` entry in
+`package.json` forces one copy of di-container, the one the loader
+names, because the event package also depends on it, and two copies
+would hold two separate sets of bindings and two `DiException` classes
+that `instanceof` cannot match. The override goes when both packages
+come from one release.
+
+The package version stays 0.1.0 on this branch, and the version call
 belongs to the merge to main.
 
 ## Files
@@ -225,16 +260,16 @@ belongs to the merge to main.
 | `test/load-condition.test.ts` | 7 | a false condition stops after `shouldLoad`, async conditions, a non-boolean answer |
 | `test/class-definitions.test.ts` | 9 | pairs, abstract lists, typed tokens, the record form, duplicates, malformed answers |
 | `test/event-bindings.test.ts` | 10 | string and object actions, transformers, 0.1 entries, strategy errors, malformed answers |
-| `test/listeners.test.ts` | 15 | plain functions, handler classes resolved on broadcast, the strategy resolved before the record, malformed answers |
+| `test/listeners.test.ts` | 17 | plain functions, handler classes and ES5 constructors resolved on broadcast, the strategy resolved before the record, a strategy failing mid-list, malformed answers |
 | `test/task-handlers.test.ts` | 10 | handlers resolved when the task runs, failures reaching the strategy, the strategy resolved before the list, malformed answers |
 | `test/controllers.test.ts` | 7 | lazy controllers, list order, the strategy resolved before the list, malformed answers |
-| `test/errors.test.ts` | 10 | `LoaderException`, which errors wrap and which pass through, the stop at the first failure, a second load |
+| `test/errors.test.ts` | 11 | `LoaderException`, which errors wrap and which pass through, the stop at the first failure, no rollback, a second load |
 | `test/bootstrapper-surface.test.ts` | 9 | the two constructor forms, `bootstrap()`, `getContainer`, `BaseInitializer`, the type guards |
 | `test/legacy-initializers.test.ts` | 2 | 0.1 initializers loading unchanged |
 | `test/package-exports.test.ts` | 1 | the public entry points, imported by package name |
 | `test/loader-type-safety.ts` | 12 rejected calls | compile-only: each interface and port rejects the wrong shape |
 
-That is 87 runtime tests. `npm test` reports 89, because it also counts
+That is 90 runtime tests. `npm test` reports 92, because it also counts
 the fixtures file and the compile-only file as empty passes.
 `npm run typecheck` checks the compile-only file.
 
@@ -242,7 +277,8 @@ Every test wires a real `Container` and, where events matter, the real
 `InMemoryEventStrategy`. The action binding, task and REST strategies
 are recording fakes, because TS Nomad has no Node implementation of
 them yet. Slice 8 adds a test against the real task and REST strategies
-when it writes them.
+when it writes them. The loader logs nothing, so the tests carry no
+logger tripwire. Every failure surfaces as a rejection the tests check.
 
 ## Packets
 

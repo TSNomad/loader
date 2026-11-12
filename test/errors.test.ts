@@ -13,6 +13,7 @@ import assert from 'node:assert/strict';
 import { AutowireError, CircularDependencyError, Container, DiException, DuplicateBindingError } from '@tsnomad/di-container';
 import { Bootstrapper } from '../dist/Bootstrapper.js';
 import { LoaderException } from '../dist/LoaderException.js';
+import type { ClassDefinition } from '../dist/interfaces.js';
 import { SendSale, traced, UserCreated, wire } from './fixtures.ts';
 
 test("LoaderException carries the initializer, its position and the cause, and its message is PHPNomad's", () => {
@@ -25,6 +26,7 @@ test("LoaderException carries the initializer, its position and the cause, and i
   assert.equal(error.position, 2);
   assert.equal(error.cause, cause);
   assert.equal(error.message, 'Failed to load ServiceInitializer');
+  assert.equal(error.code, 500);
   assert.equal(new LoaderException('x', 1, 'plain').cause, 'plain');
 });
 
@@ -135,6 +137,23 @@ test.skip('load() runs every step again when called again, so a second load into
     return true;
   });
   assert.deepEqual(log, ['Plain.load', 'Binds.getClassDefinitions']);
+});
+
+test.skip('a failed load is not rolled back: what earlier initializers and earlier steps registered stays', async () => {
+  class Store {}
+  class Cache {}
+  const container = new Container();
+  const first = { getClassDefinitions: (): ClassDefinition[] => [[Store, 'store']] };
+  const failing = {
+    getClassDefinitions: (): ClassDefinition[] => [[Cache, 'cache']],
+    load: () => {
+      throw new DiException('missing');
+    },
+  };
+
+  await assert.rejects(new Bootstrapper(container, [first, failing]).load(), (error: unknown) => error instanceof LoaderException);
+  assert.equal(container.has('store'), true);
+  assert.equal(container.has('cache'), true);
 });
 
 test.skip('a plain object initializer is named anonymous initializer, with its position', async () => {

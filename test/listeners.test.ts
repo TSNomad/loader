@@ -87,6 +87,22 @@ test.skip('a handler class is resolved from the container and its handle receive
   assert.deepEqual(handled, [['double', 'u1']]);
 });
 
+test.skip('a constructor function whose prototype has handle is a handler class too, resolved from the container', async () => {
+  const { container, events } = busContainer();
+  const handled: string[] = [];
+  function Es5Welcome(this: { prefix: string }) {
+    this.prefix = 'es5';
+  }
+  Es5Welcome.prototype.handle = function (this: { prefix: string }, event: UserCreated) {
+    handled.push(`${this.prefix}:${event.userId}`);
+  };
+
+  await new Bootstrapper(container, [listening(() => ({ [UserCreated.getId()]: Es5Welcome }))]).load();
+  await events.broadcast(new UserCreated('u1'));
+
+  assert.deepEqual(handled, ['es5:u1']);
+});
+
 test.skip('a handler class is resolved when the event fires, so it may need a binding a later initializer makes', async () => {
   const { container, events } = busContainer();
   const sent: string[] = [];
@@ -240,6 +256,24 @@ test.skip('the 0.1 bootstrap option reads the event strategy by the token it nam
   assert.equal(container.has('EventStrategy'), false);
 });
 
+test.skip('an attach that throws stops the load unchanged, and the listeners attached before it stay attached', async () => {
+  const container = new Container();
+  const refusal = new Error('bus full');
+  const attached: string[] = [];
+  container.bindFactory(EventStrategy, () => ({
+    attach(event: string) {
+      if (attached.length === 1) throw refusal;
+      attached.push(event);
+    },
+  }) as any);
+
+  await assert.rejects(new Bootstrapper(container, [listening(() => ({
+    'user.created': () => {},
+    'order.placed': () => {},
+  }))]).load(), (error: unknown) => error === refusal);
+  assert.deepEqual(attached, ['user.created']);
+});
+
 test.skip('listeners with no event strategy bound fail the load with a LoaderException and the container error', async () => {
   const container = new Container();
   class Listens {
@@ -279,6 +313,9 @@ test.skip('a malformed answer fails the load with a TypeError and attaches nothi
     ['an entry that is a string', { 'order.placed': () => {}, 'user.created': 'Welcome' }],
     ['a list holding something other than a function', { 'order.placed': () => {}, 'user.created': [Welcome, null] }],
     ['a class with no handle method', { 'order.placed': () => {}, 'user.created': class NoHandle {} }],
+    ['a class whose handle is an instance field, not a method', { 'order.placed': () => {}, 'user.created': class FieldHandle {
+      handle = (): void => {};
+    } }],
   ];
   for (const [label, answer] of malformed) {
     const { container, log } = wire();

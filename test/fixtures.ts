@@ -209,6 +209,11 @@ export function traced(log: Log, name: string, answers: Answers): any {
   return initializer;
 }
 
+/**
+ * Makes a step async. No assertion depends on how long it waits: each
+ * test that uses it checks the order of a log, which a loader that does
+ * not await gets wrong at any speed.
+ */
 export const tick = (ms = 5): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export type { ActionTransformer, EventClass, Listener };

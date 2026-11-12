@@ -4,7 +4,7 @@ This folder holds the evidence that each acceptance test is a contract,
 as `../ncc-slice-7.md` describes. The method is the one slice 6 used.
 
 - `stub-run.log` is the suite with every `skip` removed, run against
-  this branch's stubs: 89 tests, 80 fail. Of the 9 that pass, two are
+  this branch's stubs: 92 tests, 83 fail. Of the 9 that pass, two are
   the empty passes `node --test` reports for the fixtures and the
   compile-only file. Four check final code: `getContainer`,
   `BaseInitializer`, `LoaderException` and the package's exports.
@@ -15,7 +15,7 @@ as `../ncc-slice-7.md` describes. The method is the one slice 6 used.
 - `mutate.py` runs the suite once per mutation in `mutations.py` and
   writes `mutations.log`. A mutation counts as caught when the suite
   exits non-zero. Each entry names the guard it breaks and lists the
-  tests that went red. The run holds 101 entries, three of them
+  tests that went red. The run holds 106 entries, three of them
   controls, and ends with zero mismatches.
 - `types-mutate.py` does the same for the compile-only test,
   `test/loader-type-safety.ts`, from `type-mutations.py` into
@@ -43,4 +43,8 @@ moved the contract closer to PHPNomad: strategies resolve where
 PHPNomad resolves them, wrong shapes are unwrapped `TypeError`s, and
 `LoaderException` carries PHPNomad's message. The scratch
 implementation, the tests and this list changed with it, and the run
-in `mutations.log` is the one after those changes.
+in `mutations.log` is the one after those changes and after the second
+round. That round fixed how a handler class is told apart from a plain
+listener, and added tests for a load that fails partway: nothing is
+rolled back, a second `load()` fails at the first duplicate, and a
+strategy that throws mid-list leaves the earlier entries attached.

@@ -120,6 +120,7 @@ test.skip('a malformed answer fails the load with a TypeError and registers noth
     ['a record', { receive: Controller }],
     ['a Set', new Set([Controller])],
     ['a list holding an instance', [Controller, new Controller()]],
+    ['a list holding an arrow function', [Controller, () => new Controller()]],
     ['a list holding a string', [Controller, 'Controller']],
   ];
   for (const [label, answer] of malformed) {

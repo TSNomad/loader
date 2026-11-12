@@ -159,19 +159,19 @@ test.skip('a failing handler rejects the function the strategy runs, so the stra
   await assert.rejects(tasks.calls[1].handler(new SendSale('s1')), (error) => error === boom);
 });
 
-test.skip('a handler that cannot be resolved rejects the function the strategy runs', async () => {
+test.skip('a handler that cannot be resolved rejects the function the strategy runs with the container error unchanged', async () => {
   const { container, tasks } = wire();
   class NeedsSender {
-    static readonly inject = ['Sender'] as const;
-    constructor(sender: unknown) {
-      void sender;
-    }
     handle(): void {}
   }
+  const unbound = new DiException("Token 'Sender' is not bound");
+  container.bindFactory(NeedsSender, () => {
+    throw unbound;
+  });
 
   await new Bootstrapper(container, [handlers(() => [[SendSale, NeedsSender]])]).load();
 
-  await assert.rejects(tasks.calls[0].handler(new SendSale('s1')), (error) => error instanceof DiException);
+  await assert.rejects(tasks.calls[0].handler(new SendSale('s1')), (error) => error === unbound);
 });
 
 test.skip('handlers with no task strategy bound fail the load with a LoaderException and the container error', async () => {
@@ -220,6 +220,9 @@ test.skip('a malformed answer fails the load with a TypeError and attaches nothi
     ['a list of handlers holding a string', [[SendSale, [Handler, 'Handler']]]],
     ['a handler with no handle method', [[SendSale, Handler], [RefreshPlan, class NoHandle {}]]],
     ['a handler that is an arrow function', [[SendSale, Handler], [RefreshPlan, () => {}]]],
+    ['a handler whose handle is an instance field, not a method', [[SendSale, Handler], [RefreshPlan, class FieldHandle {
+      handle = (): void => {};
+    }]]],
   ];
   for (const [label, answer] of malformed) {
     const { container, log } = wire();

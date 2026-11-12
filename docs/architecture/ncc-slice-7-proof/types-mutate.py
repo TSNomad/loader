@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mutation harness for the compile-only type tests of slice 6 and later.
+"""Mutation harness for the compile-only type tests.
 
 Usage: types-mutate.py <repo-dir> <type-test-file> <mutations.py>
 
