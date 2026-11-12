@@ -22,16 +22,20 @@
  */
 
 /**
- * The key the loader resolves the task strategy by. @tsnomad/tasks
- * names its `TaskStrategy` token the same.
+ * The string token the loader resolves the task strategy by. A typed
+ * token of the same name reaches the same binding, so when
+ * @tsnomad/tasks exports its `TaskStrategy` token, slice 8 swaps this
+ * constant for it.
  */
-export const TASK_STRATEGY_KEY = 'TaskStrategy';
+export const TASK_STRATEGY_TOKEN = 'TaskStrategy';
 
 /**
- * The key the loader resolves the REST strategy by. @tsnomad/rest names
- * its `RestStrategy` token the same.
+ * The string token the loader resolves the REST strategy by. A typed
+ * token of the same name reaches the same binding, so when
+ * @tsnomad/rest exports its `RestStrategy` token, slice 8 swaps this
+ * constant for it.
  */
-export const REST_STRATEGY_KEY = 'RestStrategy';
+export const REST_STRATEGY_TOKEN = 'RestStrategy';
 
 /**
  * A task class, PHP's `Task::class`: a class whose static `getId()`

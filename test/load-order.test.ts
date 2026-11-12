@@ -46,14 +46,14 @@ test.skip('one initializer runs every step in PHPNomad order: container, conditi
     'Core.getEventBindings',
     'resolve:ActionBindingStrategy',
     'bindAction:order.placed:order.placed',
-    'Core.getListeners',
     'resolve:EventStrategy',
+    'Core.getListeners',
     'attach:user.created',
-    'Core.getTaskHandlers',
     'resolve:TaskStrategy',
+    'Core.getTaskHandlers',
     'taskAttach:send-sale',
-    'Core.getControllers',
     'resolve:RestStrategy',
+    'Core.getControllers',
     'registerRoute',
     'Core.load',
   ]);
@@ -79,8 +79,8 @@ test.skip('each initializer finishes every step before the next initializer star
     'First.setContainer',
     'First.getClassDefinitions',
     'bind',
-    'First.getListeners',
     'resolve:EventStrategy',
+    'First.getListeners',
     'attach:user.created',
     'First.load',
     'Second.setContainer',
@@ -120,8 +120,8 @@ test.skip('an initializer with only some methods runs only those steps, in the s
 
   assert.deepEqual(log, [
     'Partial.setContainer',
-    'Partial.getControllers',
     'resolve:RestStrategy',
+    'Partial.getControllers',
     'registerRoute',
     'Partial.load',
   ]);

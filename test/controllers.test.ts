@@ -101,13 +101,17 @@ test.skip('controllers with no REST strategy bound fail the load with a LoaderEx
   });
 });
 
-test.skip('an empty list resolves no REST strategy, so it loads with none bound', async () => {
-  const { container, log } = wire(['RestStrategy']);
-  await new Bootstrapper(container, [controllers(() => [])]).load();
-  assert.deepEqual(log, []);
+test.skip('the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load', async () => {
+  const { container } = wire(['RestStrategy']);
+  let asked = 0;
+  await assert.rejects(new Bootstrapper(container, [controllers(() => {
+    asked += 1;
+    return [];
+  })]).load(), (error: unknown) => error instanceof LoaderException && error.cause instanceof BindingNotFoundError);
+  assert.equal(asked, 0);
 });
 
-test.skip('a malformed answer fails the load with a LoaderException and registers nothing from it', async () => {
+test.skip('a malformed answer fails the load with a TypeError and registers nothing from it', async () => {
   class Controller {}
   const malformed: Array<[string, unknown]> = [
     ['undefined', undefined],
@@ -121,8 +125,8 @@ test.skip('a malformed answer fails the load with a LoaderException and register
   for (const [label, answer] of malformed) {
     const { container, log } = wire();
     await assert.rejects(new Bootstrapper(container, [controllers(() => answer)]).load(), (error: unknown) => {
-      assert.ok(error instanceof LoaderException, `${label} gave ${String(error)}`);
-      assert.ok(error.cause instanceof TypeError, label);
+      assert.ok(error instanceof TypeError, `${label} gave ${String(error)}`);
+      assert.match(error.message, /\(position 1\)/, label);
       assert.match(error.message, /getControllers/, label);
       return true;
     });

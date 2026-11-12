@@ -38,5 +38,5 @@ export {
   hasTaskHandlers,
   hasControllers,
 } from './interfaces.js';
-export { TASK_STRATEGY_KEY, REST_STRATEGY_KEY } from './ports.js';
+export { TASK_STRATEGY_TOKEN, REST_STRATEGY_TOKEN } from './ports.js';
 export type { LoaderTaskStrategy, LoaderRestStrategy } from './ports.js';

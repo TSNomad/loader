@@ -4,15 +4,18 @@ This folder holds the evidence that each acceptance test is a contract,
 as `../ncc-slice-7.md` describes. The method is the one slice 6 used.
 
 - `stub-run.log` is the suite with every `skip` removed, run against
-  this branch's stubs: 87 tests, 76 fail. The 11 that pass check final
-  code (`getContainer`, `BaseInitializer`, `LoaderException`) or an
-  absence, such as an empty list resolving no strategy, which the stubs
-  meet by doing nothing. The mutations below show each of those
-  absence tests failing when the absence breaks.
+  this branch's stubs: 89 tests, 80 fail. Of the 9 that pass, two are
+  the empty passes `node --test` reports for the fixtures and the
+  compile-only file. Four check final code: `getContainer`,
+  `BaseInitializer`, `LoaderException` and the package's exports.
+  Three check an absence, which the stubs meet by doing nothing: a
+  bootstrapper with no initializers, and an empty list of class
+  definitions or event bindings loading with nothing bound. The mutations below
+  show each absence test failing when the absence breaks.
 - `mutate.py` runs the suite once per mutation in `mutations.py` and
   writes `mutations.log`. A mutation counts as caught when the suite
   exits non-zero. Each entry names the guard it breaks and lists the
-  tests that went red. The run holds 93 entries, three of them
+  tests that went red. The run holds 101 entries, three of them
   controls, and ends with zero mismatches.
 - `types-mutate.py` does the same for the compile-only test,
   `test/loader-type-safety.ts`, from `type-mutations.py` into
@@ -35,5 +38,9 @@ python3 docs/architecture/ncc-slice-7-proof/types-mutate.py . test/loader-type-s
 The first full run found four guards no test caught: a pair with a
 third item in event bindings and task handlers, a pair-shaped object
 that is not an array, and a `Set` answered where a list belongs. The
-malformed-answer tests gained those cases, and the run in
-`mutations.log` is the one after that change.
+malformed-answer tests gained those cases. The first audit round then
+moved the contract closer to PHPNomad: strategies resolve where
+PHPNomad resolves them, wrong shapes are unwrapped `TypeError`s, and
+`LoaderException` carries PHPNomad's message. The scratch
+implementation, the tests and this list changed with it, and the run
+in `mutations.log` is the one after those changes.

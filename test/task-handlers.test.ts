@@ -192,13 +192,17 @@ test.skip('handlers with no task strategy bound fail the load with a LoaderExcep
   });
 });
 
-test.skip('an empty list resolves no task strategy, so it loads with none bound', async () => {
-  const { container, log } = wire(['TaskStrategy']);
-  await new Bootstrapper(container, [handlers(() => [])]).load();
-  assert.deepEqual(log, []);
+test.skip('the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load', async () => {
+  const { container } = wire(['TaskStrategy']);
+  let asked = 0;
+  await assert.rejects(new Bootstrapper(container, [handlers(() => {
+    asked += 1;
+    return [];
+  })]).load(), (error: unknown) => error instanceof LoaderException && error.cause instanceof BindingNotFoundError);
+  assert.equal(asked, 0);
 });
 
-test.skip('a malformed answer fails the load with a LoaderException and attaches nothing from it', async () => {
+test.skip('a malformed answer fails the load with a TypeError and attaches nothing from it', async () => {
   class Handler {
     handle(): void {}
   }
@@ -214,12 +218,14 @@ test.skip('a malformed answer fails the load with a LoaderException and attaches
     ['a pair whose task is not a class', [[SendSale, Handler], ['refresh-plan', Handler]]],
     ['a handler that is an instance', [[SendSale, Handler], [RefreshPlan, new Handler()]]],
     ['a list of handlers holding a string', [[SendSale, [Handler, 'Handler']]]],
+    ['a handler with no handle method', [[SendSale, Handler], [RefreshPlan, class NoHandle {}]]],
+    ['a handler that is an arrow function', [[SendSale, Handler], [RefreshPlan, () => {}]]],
   ];
   for (const [label, answer] of malformed) {
     const { container, log } = wire();
     await assert.rejects(new Bootstrapper(container, [handlers(() => answer)]).load(), (error: unknown) => {
-      assert.ok(error instanceof LoaderException, `${label} gave ${String(error)}`);
-      assert.ok(error.cause instanceof TypeError, label);
+      assert.ok(error instanceof TypeError, `${label} gave ${String(error)}`);
+      assert.match(error.message, /\(position 1\)/, label);
       assert.match(error.message, /getTaskHandlers/, label);
       return true;
     });

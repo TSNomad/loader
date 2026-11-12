@@ -148,7 +148,7 @@ test.skip('a pair with no abstract fails the load with the container error as th
   );
 });
 
-test.skip('an answer that is neither a list of pairs nor a plain record fails the load and binds nothing', async () => {
+test.skip('an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing', async () => {
   const malformed: Array<[string, unknown]> = [
     ['undefined', undefined],
     ['null', null],
@@ -166,8 +166,8 @@ test.skip('an answer that is neither a list of pairs nor a plain record fails th
     await assert.rejects(
       new Bootstrapper(container, [definitions(() => answer)]).load(),
       (error: unknown) => {
-        assert.ok(error instanceof LoaderException, `${label} gave ${String(error)}`);
-        assert.ok(error.cause instanceof TypeError, label);
+        assert.ok(error instanceof TypeError, `${label} gave ${String(error)}`);
+        assert.match(error.message, /\(position 1\)/, label);
         assert.match(error.message, /getClassDefinitions/, label);
         return true;
       }

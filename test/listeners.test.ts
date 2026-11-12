@@ -256,12 +256,17 @@ test.skip('listeners with no event strategy bound fail the load with a LoaderExc
   });
 });
 
-test.skip('an empty record resolves no event strategy, so it loads with none bound', async () => {
+test.skip('the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load', async () => {
   const container = new Container();
-  await new Bootstrapper(container, [listening(() => ({}))]).load();
+  let asked = 0;
+  await assert.rejects(new Bootstrapper(container, [listening(() => {
+    asked += 1;
+    return {};
+  })]).load(), (error: unknown) => error instanceof LoaderException && error.cause instanceof BindingNotFoundError);
+  assert.equal(asked, 0);
 });
 
-test.skip('a malformed answer fails the load with a LoaderException and attaches nothing from it', async () => {
+test.skip('a malformed answer fails the load with a TypeError and attaches nothing from it', async () => {
   class Welcome implements CanHandle<UserCreated> {
     handle(): void {}
   }
@@ -273,12 +278,13 @@ test.skip('a malformed answer fails the load with a LoaderException and attaches
     ['an entry that is an instance, not a class', { 'order.placed': () => {}, 'user.created': new Welcome() }],
     ['an entry that is a string', { 'order.placed': () => {}, 'user.created': 'Welcome' }],
     ['a list holding something other than a function', { 'order.placed': () => {}, 'user.created': [Welcome, null] }],
+    ['a class with no handle method', { 'order.placed': () => {}, 'user.created': class NoHandle {} }],
   ];
   for (const [label, answer] of malformed) {
     const { container, log } = wire();
     await assert.rejects(new Bootstrapper(container, [listening(() => answer)]).load(), (error: unknown) => {
-      assert.ok(error instanceof LoaderException, `${label} gave ${String(error)}`);
-      assert.ok(error.cause instanceof TypeError, label);
+      assert.ok(error instanceof TypeError, `${label} gave ${String(error)}`);
+      assert.match(error.message, /\(position 1\)/, label);
       assert.match(error.message, /getListeners/, label);
       return true;
     });

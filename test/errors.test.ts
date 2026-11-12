@@ -15,7 +15,7 @@ import { Bootstrapper } from '../dist/Bootstrapper.js';
 import { LoaderException } from '../dist/LoaderException.js';
 import { SendSale, traced, UserCreated, wire } from './fixtures.ts';
 
-test('LoaderException carries the initializer, its position and the cause, and its message reads in one line', () => {
+test("LoaderException carries the initializer, its position and the cause, and its message is PHPNomad's", () => {
   const cause = new DiException("Token 'Mailer' is not bound. Available: none");
   const error = new LoaderException('ServiceInitializer', 2, cause);
 
@@ -24,8 +24,8 @@ test('LoaderException carries the initializer, its position and the cause, and i
   assert.equal(error.initializer, 'ServiceInitializer');
   assert.equal(error.position, 2);
   assert.equal(error.cause, cause);
-  assert.equal(error.message, "Failed to load ServiceInitializer (position 2): Token 'Mailer' is not bound. Available: none");
-  assert.equal(new LoaderException('x', 1, 'plain').message, 'Failed to load x (position 1): plain');
+  assert.equal(error.message, 'Failed to load ServiceInitializer');
+  assert.equal(new LoaderException('x', 1, 'plain').cause, 'plain');
 });
 
 test.skip('a DiException thrown from load() becomes a LoaderException with it as the cause', async () => {
@@ -46,7 +46,7 @@ test.skip('a DiException thrown from load() becomes a LoaderException with it as
     assert.equal(error.initializer, 'Warmup');
     assert.equal(error.position, 1);
     assert.ok(error.cause instanceof DiException);
-    assert.match(error.message, /^Failed to load Warmup \(position 1\): /);
+    assert.equal(error.message, 'Failed to load Warmup');
     return true;
   });
 });
@@ -114,6 +114,27 @@ test.skip('the load stops at the first failing initializer, and later initialize
     return true;
   });
   assert.deepEqual(log, ['First.setContainer', 'First.load', 'Failing.setContainer', 'Failing.load']);
+});
+
+test.skip('load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding', async () => {
+  class Store {}
+  const log: string[] = [];
+  const container = new Container();
+  const bootstrapper = new Bootstrapper(container, [
+    traced(log, 'Plain', { load: () => {} }),
+    traced(log, 'Binds', { getClassDefinitions: () => [[Store, 'store']] }),
+  ]);
+  await bootstrapper.load();
+  log.length = 0;
+
+  await assert.rejects(bootstrapper.load(), (error: unknown) => {
+    assert.ok(error instanceof LoaderException);
+    assert.equal(error.initializer, 'Binds');
+    assert.equal(error.position, 2);
+    assert.ok(error.cause instanceof DuplicateBindingError);
+    return true;
+  });
+  assert.deepEqual(log, ['Plain.load', 'Binds.getClassDefinitions']);
 });
 
 test.skip('a plain object initializer is named anonymous initializer, with its position', async () => {

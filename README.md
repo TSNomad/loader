@@ -38,8 +38,10 @@ bindings, listeners, task handlers, controllers, then `load`. A false
 - Each initializer now runs every step before the next one starts, so
   a later initializer's bindings are not there during an earlier one's
   `load()`.
-- Listeners with no `EventStrategy` bound fail the load with a
-  `LoaderException`, where 0.1 skipped them.
+- An initializer with `getListeners`, `getTaskHandlers` or
+  `getControllers` needs that strategy bound, even for an empty list.
+  The load fails with a `LoaderException` when it is missing.
+- An answer of the wrong shape fails the load with a `TypeError`.
 - `CanSetContainer` is the container package's, and its `setContainer`
   returns `this`. A class that names the interface returns `this`.
 - `HasEventBindings` is the event package's pair shape. The 0.1
@@ -50,12 +52,16 @@ bindings, listeners, task handlers, controllers, then `load`. A false
 
 - `load()` is async and awaits each step, `shouldLoad()` and the
   initializer's own `load()` included.
-- An empty list never resolves its strategy. PHPNomad resolves the
-  event and REST strategies as soon as an initializer has the method.
-- A malformed answer fails the load with a `LoaderException`. PHPNomad
-  wraps only `DiException`.
-- The task and REST strategies are read by the keys `'TaskStrategy'`
-  and `'RestStrategy'` until their packages exist.
+- The bootstrapper checks each answer's shape and throws the
+  `TypeError` PHP's return types would, since TypeScript's types are
+  gone at run time.
+- PHPNomad's mutations, updates, GraphQL, commands and facades steps
+  have no TS Nomad package yet, so the bootstrapper skips them.
+- A listener may be a plain function, the 0.1 form.
+- The task and REST strategies are read by the string tokens
+  `'TaskStrategy'` and `'RestStrategy'` until their packages exist.
+
+The architecture note lists each difference in full.
 
 ## Extracted 2026-09-17
 

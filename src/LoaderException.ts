@@ -3,12 +3,20 @@
  *
  * PHPNomad's `PHPNomad\Loader\Exceptions\LoaderException`. The
  * bootstrapper throws it when an initializer fails to load because of a
- * container error, a `DiException` from @tsnomad/di-container, or
- * because the initializer answered one of the loader's questions with
- * the wrong shape. The original error is the `cause`.
+ * container error, a `DiException` from @tsnomad/di-container. The
+ * message is PHPNomad's, `Failed to load <initializer>`, and the
+ * container error is the `cause`.
  *
  * Every other error passes through the bootstrapper unchanged, as in
  * PHPNomad, which wraps only a `DiException`.
+ *
+ * Where this differs from PHPNomad:
+ * - PHP builds it from a message, the code 500 and the previous
+ *   exception. Here the constructor takes the initializer's name, its
+ *   position and the cause, and builds the message itself. The name and
+ *   the position stay on the error as fields, so a caller that logs the
+ *   failure can say which initializer it was without parsing text.
+ * - There is no error code, because a JavaScript `Error` has none.
  */
 
 export class LoaderException extends Error {
@@ -24,14 +32,7 @@ export class LoaderException extends Error {
     public readonly position: number,
     cause: unknown
   ) {
-    super(`Failed to load ${initializer} (position ${position}): ${LoaderException.messageOf(cause)}`, { cause });
+    super(`Failed to load ${initializer}`, { cause });
     this.name = 'LoaderException';
-  }
-
-  private static messageOf(cause: unknown): string {
-    if (cause instanceof Error) {
-      return cause.message;
-    }
-    return String(cause);
   }
 }

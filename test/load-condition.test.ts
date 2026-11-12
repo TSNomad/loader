@@ -10,7 +10,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Bootstrapper } from '../dist/Bootstrapper.js';
-import { LoaderException } from '../dist/LoaderException.js';
 import { OrderPlaced, SendSale, tick, traced, UserCreated, wire } from './fixtures.ts';
 
 class Store {}
@@ -89,14 +88,14 @@ test.skip('a true condition, sync or async, runs every step', async () => {
       'On.getEventBindings',
       'resolve:ActionBindingStrategy',
       'bindAction:order.placed:order.placed',
-      'On.getListeners',
       'resolve:EventStrategy',
+      'On.getListeners',
       'attach:user.created',
-      'On.getTaskHandlers',
       'resolve:TaskStrategy',
+      'On.getTaskHandlers',
       'taskAttach:send-sale',
-      'On.getControllers',
       'resolve:RestStrategy',
+      'On.getControllers',
       'registerRoute',
       'On.load',
     ]);
@@ -120,7 +119,7 @@ test.skip('the condition is asked after setContainer and before the class defini
   assert.deepEqual(seen, [true, false]);
 });
 
-test.skip('an answer that is not a boolean fails the load with a LoaderException and runs no later step', async () => {
+test.skip('an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step', async () => {
   for (const answer of [undefined, null, 1, 0, 'yes', '', {}, Promise.resolve(undefined), Promise.resolve('true')]) {
     const { container, log } = wire();
     const initializer = conditional(log, 'Vague', () => answer);
@@ -129,10 +128,9 @@ test.skip('an answer that is not a boolean fails the load with a LoaderException
     await assert.rejects(
       new Bootstrapper(container, [initializer, next]).load(),
       (error: unknown) => {
-        assert.ok(error instanceof LoaderException, `answer ${String(answer)} gave ${String(error)}`);
-        assert.equal(error.initializer, 'Vague');
-        assert.ok(error.cause instanceof TypeError);
+        assert.ok(error instanceof TypeError, `answer ${String(answer)} gave ${String(error)}`);
         assert.match(error.message, /shouldLoad/);
+        assert.match(error.message, /Vague \(position 1\)/);
         return true;
       }
     );

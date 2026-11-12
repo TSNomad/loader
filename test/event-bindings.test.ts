@@ -139,7 +139,7 @@ test.skip('an error the strategy throws, such as its TypeError for a bad event c
   );
 });
 
-test.skip('a malformed answer fails the load with a LoaderException and binds nothing from it', async () => {
+test.skip('a malformed answer fails the load with a TypeError and binds nothing from it', async () => {
   const malformed: Array<[string, unknown]> = [
     ['undefined', undefined],
     ['a promise', Promise.resolve([[OrderPlaced, 'order.placed']])],
@@ -159,8 +159,8 @@ test.skip('a malformed answer fails the load with a LoaderException and binds no
   for (const [label, answer] of malformed) {
     const { container, log } = wire();
     await assert.rejects(new Bootstrapper(container, [bindings(() => answer)]).load(), (error: unknown) => {
-      assert.ok(error instanceof LoaderException, `${label} gave ${String(error)}`);
-      assert.ok(error.cause instanceof TypeError, label);
+      assert.ok(error instanceof TypeError, `${label} gave ${String(error)}`);
+      assert.match(error.message, /\(position 1\)/, label);
       assert.match(error.message, /getEventBindings/, label);
       return true;
     });
