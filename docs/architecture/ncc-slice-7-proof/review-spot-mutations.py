@@ -6,6 +6,7 @@
 B = 'src/Bootstrapper.ts'
 DEF_CHECK_THEN_BIND = (
     "            place\n          );\n        }\n      }\n"
+    "      this.checkAbstracts(answer as ReadonlyArray<readonly [abstract new (...args: any[]) => object, unknown]>);\n"
     "      for (const [concrete, abstracts] of answer as ReadonlyArray<readonly [unknown, unknown]>) {\n"
     "        container.bind(concrete, ...(Array.isArray(abstracts) ? abstracts : [abstracts]));\n      }\n"
 )

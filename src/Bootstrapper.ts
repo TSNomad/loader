@@ -21,7 +21,19 @@
  *    so nothing is logged or thrown for it.
  * 3. `getClassDefinitions()`: each pair goes to
  *    `container.bind(concrete, ...abstracts)`, and each entry of the
- *    0.1 record form to `container.bind(token, factory)`.
+ *    0.1 record form to `container.bind(token, factory)`. Before it
+ *    binds any pair, the bootstrapper checks every pair's abstracts:
+ *    each pair names at least one, each is a class, a typed token or a
+ *    string token, none appears twice in the answer, and none is one the
+ *    container already holds. For the record form, no token may be one
+ *    the container already holds. A bad abstract fails the load with a
+ *    `LoaderException` and binds nothing from the answer. Its cause is a
+ *    `DiException` naming `getClassDefinitions` and the pair's concrete
+ *    for a missing abstract or one that is no token, and a
+ *    `DuplicateBindingError` naming the abstract for one named twice or
+ *    already held. The container keeps to itself which classes an
+ *    earlier `get` autowired, so it refuses such a class only at bind
+ *    time, and that refusal can leave the answer's earlier pairs bound.
  * 4. `getEventBindings()`: for each pair, the container's
  *    `ActionBindingStrategy` is resolved, and each action goes to it as
  *    `bindAction(eventClass, action)` or
@@ -108,7 +120,7 @@
  *   form.
  */
 
-import { DiException } from '@tsnomad/di-container';
+import { DiException, DuplicateBindingError } from '@tsnomad/di-container';
 import type { Container, Token, TypedToken } from '@tsnomad/di-container';
 import { ActionBindingStrategy, EventStrategy } from '@tsnomad/event';
 import type { Initializer, Loadable } from './interfaces.js';
@@ -125,7 +137,7 @@ import {
 import { LoaderException } from './LoaderException.js';
 import { REST_STRATEGY_TOKEN, TASK_STRATEGY_TOKEN } from './ports.js';
 import type { LoaderRestStrategy, LoaderTaskStrategy } from './ports.js';
-import { describeValue, initializerName, isClassSyntax, isConstructable, isHandlerClass, isPlainObject } from './shapes.js';
+import { abstractKey, describeValue, initializerName, isClassSyntax, isConstructable, isHandlerClass, isPlainObject } from './shapes.js';
 
 /**
  * The 0.1 name of the token the bootstrapper reads the event strategy
@@ -286,8 +298,18 @@ export class Bootstrapper implements Loadable {
   }
 
   /**
-   * Step 3. Checks the whole answer, then binds each pair, or each
-   * entry of the 0.1 record, in order.
+   * Step 3. Checks the shape of the whole answer, then the abstracts of
+   * every pair, or the tokens of the 0.1 record, and only then binds
+   * each pair, or each record entry, in order.
+   *
+   * A pair with no abstract, or with an abstract that is no class, typed
+   * token or string token, throws a `DiException` naming
+   * `getClassDefinitions` and the pair's concrete. An abstract named
+   * twice in the answer, or one the container already holds, throws a
+   * `DuplicateBindingError` naming it, as does a record token the
+   * container already holds. `run` wraps either in a `LoaderException`,
+   * and nothing from the answer is bound. A pair of the wrong shape,
+   * its concrete included, throws a `TypeError` before any of that.
    */
   private bindClassDefinitions(answer: unknown, place: Place): void {
     const container = this.container as unknown as Binds;
@@ -302,6 +324,7 @@ export class Bootstrapper implements Loadable {
           );
         }
       }
+      this.checkAbstracts(answer as ReadonlyArray<readonly [abstract new (...args: any[]) => object, unknown]>);
       for (const [concrete, abstracts] of answer as ReadonlyArray<readonly [unknown, unknown]>) {
         container.bind(concrete, ...(Array.isArray(abstracts) ? abstracts : [abstracts]));
       }
@@ -318,6 +341,11 @@ export class Bootstrapper implements Loadable {
           );
         }
       }
+      for (const token of Object.keys(answer)) {
+        if (this.container.has(token)) {
+          throw new DuplicateBindingError(token, 'bound');
+        }
+      }
       for (const [token, factory] of Object.entries(answer)) {
         container.bind(token, factory);
       }
@@ -329,6 +357,37 @@ export class Bootstrapper implements Loadable {
       `must answer a list of [concrete, abstracts] pairs or a plain record, got ${describeValue(answer)}`,
       place
     );
+  }
+
+  /**
+   * Step 3's check of every pair's abstracts, run after the shape check
+   * and before any pair is bound. Throws for the first bad abstract, in
+   * list order, as `bindClassDefinitions` describes.
+   */
+  private checkAbstracts(pairs: ReadonlyArray<readonly [abstract new (...args: any[]) => object, unknown]>): void {
+    const seen = new Set<unknown>();
+    for (const [index, [concrete, abstracts]] of pairs.entries()) {
+      const listed: unknown[] = Array.isArray(abstracts) ? abstracts : [abstracts];
+      if (listed.length === 0) {
+        throw new DiException(`getClassDefinitions() entry ${index} binds ${concrete.name} to no abstract.`);
+      }
+      for (const abstract of listed) {
+        const key = abstractKey(abstract);
+        if (key === undefined) {
+          throw new DiException(
+            `getClassDefinitions() entry ${index} binds ${concrete.name} to ${describeValue(abstract)}, which is not a class, a typed token or a string token.`
+          );
+        }
+        const name = typeof key === 'string' ? key : key.name;
+        if (seen.has(key)) {
+          throw new DuplicateBindingError(name, 'repeated');
+        }
+        if (this.container.has(key as Token)) {
+          throw new DuplicateBindingError(name, 'bound');
+        }
+        seen.add(key);
+      }
+    }
   }
 
   /**

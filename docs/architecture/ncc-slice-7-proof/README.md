@@ -69,3 +69,25 @@ python3 docs/architecture/ncc-slice-7-proof/mutate.py . docs/architecture/ncc-sl
   never committed. The scratch passes all 102 tests. Each of the 12
   mutations breaks one check in the ruling, or the error it raises,
   and each is caught by a P4 test.
+
+## P4, the implementation
+
+- `p4-mutations.py` and `p4-mutations.log`: packet P4's list, 27
+  entries, three of them controls, against the committed step 3 and
+  the `abstractKey` helper. Each P4 entry breaks one check of the
+  ruling, the order of checking before binding, or the error a check
+  raises, and a P4 acceptance test catches each. The U entries guard
+  the unit tests in `test/step3-abstracts.test.ts`: the reason each
+  `DuplicateBindingError` carries, and the key the check compares
+  abstracts by. It reruns on this branch:
+
+```
+python3 docs/architecture/ncc-slice-7-proof/mutate.py . docs/architecture/ncc-slice-7-proof/p4-mutations.py
+```
+
+- P4 puts the abstract check between step 3's shape check and its
+  binds, which moved the find text of one entry in each of two lists:
+  D9 in `p1-mutations.py` and V1 in `review-spot-mutations.py`. Both
+  now include the check's line, and both still break the same guard.
+  `p1-mutations.p4-rerun.log` and `review-spot-mutations.p4-rerun.log`
+  are the reruns on the P4 code, each with zero mismatches.

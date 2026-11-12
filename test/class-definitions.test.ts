@@ -144,7 +144,7 @@ test('a duplicate binding fails the load with a LoaderException naming the secon
   );
 });
 
-test.skip('a pair with no abstract fails the load with a LoaderException whose cause names the step and the concrete, and binds nothing', async () => {
+test('a pair with no abstract fails the load with a LoaderException whose cause names the step and the concrete, and binds nothing', async () => {
   const container = new Container();
   await assert.rejects(
     new Bootstrapper(container, [definitions(() => [[MemoryStore, []]])]).load(),
@@ -160,7 +160,7 @@ test.skip('a pair with no abstract fails the load with a LoaderException whose c
   assert.deepEqual(container.getTokens(), []);
 });
 
-test.skip('a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer', async () => {
+test('a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer', async () => {
   const cases: Array<{ label: string; earlier?: unknown; answer: unknown; duplicate?: string; bound: unknown[] }> = [
     { label: 'a later pair with no abstract', answer: [[MemoryStore, Store], [SystemClock, []]], bound: [] },
     { label: 'a later pair whose abstract is no token', answer: [[MemoryStore, Store], [SystemClock, [Clock, 42]]], bound: [] },

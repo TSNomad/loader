@@ -90,3 +90,22 @@ export function describeValue(value: unknown): string {
   }
   return `the ${typeof value} ${String(value)}`;
 }
+
+/**
+ * The key step 3 compares abstracts by, as the container keys its
+ * bindings: a class is its own key, and a typed token or a string token
+ * is keyed by its name, so a typed token and a string token with the
+ * same name share one key, and so does any object with a string
+ * `name`, as in the container. Answers undefined for a value that is no
+ * class, typed token or string token, such as a number, null, an array
+ * or an arrow function.
+ */
+export function abstractKey(value: unknown): (abstract new (...args: any[]) => object) | string | undefined {
+  if (isConstructable(value) || typeof value === 'string') {
+    return value;
+  }
+  if (value !== null && typeof value === 'object' && typeof (value as { name?: unknown }).name === 'string') {
+    return (value as { name: string }).name;
+  }
+  return undefined;
+}

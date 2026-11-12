@@ -88,7 +88,7 @@ MUTATIONS = [
   ('D7 pair length not checked', B, DEF_PAIR, DEF_PAIR.replace(" || pair.length !== 2", ""), 'killed'),
   ('D8 concrete type not checked', B, DEF_PAIR, DEF_PAIR.replace(" || !isConstructable(pair[0])", ""), 'killed'),
   ('D9 validate while binding, not before', B,
-   "            place\n          );\n        }\n      }\n      for (const [concrete, abstracts] of answer as ReadonlyArray<readonly [unknown, unknown]>) {\n        " + BIND_PAIR + "\n      }",
+   "            place\n          );\n        }\n      }\n      this.checkAbstracts(answer as ReadonlyArray<readonly [abstract new (...args: any[]) => object, unknown]>);\n      for (const [concrete, abstracts] of answer as ReadonlyArray<readonly [unknown, unknown]>) {\n        " + BIND_PAIR + "\n      }",
    "            place\n          );\n        }\n        container.bind(pair[0], ...(Array.isArray(pair[1]) ? pair[1] : [pair[1]]));\n      }", 'killed'),
   ('D10 any object counts as a record (promise, Map, class)', B, "    if (isPlainObject(answer)) {\n      for (const [token, factory]", "    if (answer !== null && (typeof answer === 'object' || typeof answer === 'function')) {\n      for (const [token, factory]", 'killed'),
   ('D11 record factory type not checked', B, "        if (typeof factory !== 'function') {", "        if (false) {", 'killed'),
