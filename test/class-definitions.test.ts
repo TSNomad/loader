@@ -4,11 +4,10 @@
  * record form goes to `bind(token, factory)`, and a malformed answer
  * binds nothing from that initializer.
  *
- * Packet P1 implemented these and removed their `skip`. A ruling after
- * the slice 7 review made step 3 check every pair's abstracts before it
- * binds any pair, so a bad abstract fails with a `LoaderException` and
- * binds nothing. The two tests that pin it carry `skip` until packet P4
- * implements it.
+ * Step 3 checks every pair's abstracts before it binds any pair, so a
+ * bad abstract fails with a `LoaderException` and binds nothing. Packet
+ * P1 implemented these tests and packet P4 the abstract check, so every
+ * test runs and passes.
  */
 
 import { test } from 'node:test';

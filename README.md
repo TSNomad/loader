@@ -49,8 +49,7 @@ a new container and load into it.
   The load fails with a `LoaderException` when it is missing.
 - An answer of the wrong shape fails the load with a `TypeError`.
 - A bad abstract in `getClassDefinitions()` fails the load with a
-  `LoaderException`. Once the pending step 3 change lands, it binds
-  nothing from that answer.
+  `LoaderException` and binds nothing from that answer.
 - `CanSetContainer` is the container package's, and its `setContainer`
   returns `this`. A class that names the interface returns `this`.
 - `HasEventBindings` is the event package's pair shape. The 0.1

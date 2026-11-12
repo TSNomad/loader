@@ -1,15 +1,12 @@
 # Loader reshape toward PHPNomad
 
-Status: implemented, apart from one ruling packet P4 carries. Packet
-P1, the implementation task for the bootstrapper, built `load()`, `bootstrap()`,
-the constructor's normalizing and the shape checks, and removed every
-`skip` it was given. Packet P3 generalized the consumer check and ran it
-across the five consumers. The slice 7 review fixed two packet faults
-and found that step 3 bound each pair before it checked the next pair's
-abstracts. A ruling after the review settles that: step 3 checks
-every pair's abstracts before it binds any pair. Packet P4 implements
-the ruling, and its two acceptance tests carry `test.skip` until it does. Every
-other test runs and passes.
+Status: implemented. Packet P1, the implementation task for the
+bootstrapper, built `load()`, `bootstrap()`, the constructor's
+normalizing and the shape checks. Packet P3 generalized the consumer
+check and ran it across the five consumers. The slice 7 review fixed
+two packet faults. Packet P4 applies the step 3 ruling: step 3 checks
+every pair's abstracts before it binds any pair. Every test runs and
+passes.
 
 This is slice 7 of the Siren Node commerce connectors build, the loader
 half. The registry half lives in the registry repository, in its own
@@ -192,8 +189,8 @@ Packet P3, the consumer check, measured these against the five
 consumers, called consumers A to E here. All five passed its compare
 against the slice 6 baselines. The fix patches needed one change beyond
 slice 6's, the `CanSetContainer` fix below, in consumer C, and nothing
-outside this list broke a build or a test. P3 ran before P4, so the
-step 3 change has not met the consumers yet.
+outside this list broke a build or a test. P3 ran again at the P4 and
+P5 heads, and all five passed the same compare.
 
 - A later initializer's bindings are not there during an earlier
   initializer's `load()`. In 0.1 every initializer bound before any
@@ -213,8 +210,8 @@ step 3 change has not met the consumers yet.
   compiling only if its entries are `{ eventId, listener }` objects,
   which the new type also accepts.
 - A wrong shape is a `TypeError`. 0.1 used what it could.
-- After P4, a bad abstract anywhere in `getClassDefinitions()` binds
-  nothing from that answer. 0.1 bound the pairs before it.
+- A bad abstract anywhere in `getClassDefinitions()` binds nothing
+  from that answer. 0.1 bound the pairs before it.
 
 ## Where this differs from PHPNomad
 
@@ -307,8 +304,8 @@ belongs to the merge to main.
 | `src/interfaces.ts` | `ClassDefinition`, `HasClassDefinitions`, `HasLoadCondition`, `Loadable`, the `Initializer` shape, the type guards, and the re-exports from the container and event packages |
 | `src/ports.ts` | The task and REST shapes the loader calls, and their string tokens |
 | `src/LoaderException.ts` | `LoaderException`, final |
-| `src/Bootstrapper.ts` | `Bootstrapper`, built by P1. P4 changes step 3 |
-| `src/shapes.ts` | The shape checks P1 split out, internal to the package |
+| `src/Bootstrapper.ts` | `Bootstrapper`, built by P1, with P4's step 3 check |
+| `src/shapes.ts` | The shape checks P1 split out and P4's `abstractKey` helper, internal to the package |
 | `src/BaseInitializer.ts` | `BaseInitializer`, final |
 | `scripts/consumer-check.sh` | The consumer check P3 generalized to pin any of the four TS Nomad packages |
 
@@ -329,13 +326,14 @@ belongs to the merge to main.
 | `test/package-exports.test.ts` | 1 | the public entry points, imported by package name |
 | `test/loader-type-safety.ts` | 12 rejected calls | compile-only: each interface and port rejects the wrong shape |
 
-That is 91 acceptance tests at run time, 2 of them skipped for P4.
-Beside them run 9 unit tests, in `test/shapes.test.ts` and
-`test/bootstrapper-internals.test.ts`. P1 wrote eight, and the review
-added the ninth. `npm test` reports 102: the 100 runtime tests and the fixtures
-file and the compile-only file, each counted as an empty pass. Today
-100 pass and 2 are skipped. `npm run typecheck` checks the
-compile-only file.
+That is 91 acceptance tests at run time. Beside them run 15 unit
+tests. P1 wrote eight, in `test/shapes.test.ts` and
+`test/bootstrapper-internals.test.ts`, and the review added a ninth.
+P4 wrote six in `test/step3-abstracts.test.ts`, for the abstract key
+helper and the reason each `DuplicateBindingError` carries. `npm test`
+reports 108: the 106 runtime tests and the fixtures file and the
+compile-only file, each counted as an empty pass. All 108 pass.
+`npm run typecheck` checks the compile-only file.
 
 Every test wires a real `Container` and, where events matter, the real
 `InMemoryEventStrategy`. The action binding, task and REST strategies
@@ -352,9 +350,7 @@ logger tripwire. Every failure surfaces as a rejection the tests check.
 - P3, the consumer check across the five consumers, pinning
   di-container, event, loader and registry. Done.
 - P4, the step 3 ruling. It checks every pair's abstracts before
-  binding any pair, removes the `skip` from the two tests above, and
-  brings the `Bootstrapper` class comment's step 3 in line with this
-  note. Open.
+  binding any pair, and the two tests above pin it. Done.
 
 The registry repository's note covers P2 and P5.
 
@@ -363,7 +359,7 @@ The registry repository's note covers P2 and P5.
 The proof folder (`ncc-slice-7-proof/`) holds the mutation lists and
 their logs. The architecture lists ran against scratch implementations
 in separate clones that are never committed, with every `skip` removed.
-P1's list, and the review's spot and fix lists, ran against the
-committed code. Every guard has one mutation, and each run starts with
+P1's and P4's lists, and the review's spot and fix lists, ran against
+the committed code. Every guard has one mutation, and each run starts with
 three controls. That folder's README gives the counts and says which
 lists rerun on this branch.
