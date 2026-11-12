@@ -44,11 +44,15 @@
 # installed copy, that every copy carries the version in its pinned
 # commit's package.json and holds the same src files as that commit,
 # wherever it sits, and that every lockfile entry for it resolves to its
-# pinned commit. A consumer whose pins do not hold fails, so a green row
-# always means the new code ran.
+# pinned commit. A named package that the consumer's own package.json
+# and lockfile do not mention before pinning is not in its tree. The
+# script lists it in <consumer>.pins-absent and checks that nothing
+# installed it, the one exception to the copy and lockfile checks. A
+# consumer whose pins do not hold fails, so a green row always means the
+# new code ran.
 #
 # Tests run only when the build passed. Next to the logs, each consumer
-# gets <consumer>.mode, .pinned, .commit, .pins, .built, .test-rc, .tests
+# gets <consumer>.mode, .pinned, .commit, .pins, .pins-absent, .built, .test-rc, .tests
 # (the number of tests vitest ran), .failures (failing test names, from
 # vitest's FAIL lines), .failure-messages (each failing test with the first
 # line of its error, shared by every test vitest groups under that error),
@@ -360,11 +364,12 @@ NODE
 
 check_pins() {
   # Run in the consumer folder after install. Prints one line per problem.
-  node - "$root/run.pinned" "$refs" <<'NODE'
+  # $1 the consumer's package.json and lockfile as they were before pinning, $2 where to list absent packages
+  node - "$root/run.pinned" "$refs" "$1" "$2" <<'NODE'
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const [pinnedFile, refs] = process.argv.slice(2);
+const [pinnedFile, refs, originalTree, absentFile] = process.argv.slice(2);
 // Only the packages this run named. An unchecked package is left alone.
 const pins = {};
 for (const line of fs.readFileSync(pinnedFile, 'utf8').split('\n').filter(Boolean)) {
@@ -373,6 +378,10 @@ for (const line of fs.readFileSync(pinnedFile, 'utf8').split('\n').filter(Boolea
 }
 const short = (name) => name.slice('@tsnomad/'.length);
 const problems = [];
+// A pinned package the consumer never mentioned before pinning is not in its tree.
+const original = fs.readFileSync(originalTree, 'utf8');
+const absent = Object.keys(pins).filter((name) => !original.includes(name));
+fs.writeFileSync(absentFile, absent.map((name) => `${name} is not in this consumer's tree\n`).join(''));
 
 function srcHash(dir) {
   const hash = crypto.createHash('sha256');
@@ -423,6 +432,10 @@ function walk(dir, depth) {
 }
 walk('node_modules', 0);
 for (const [name, list] of Object.entries(copies)) {
+  if (absent.includes(name)) {
+    if (list.length > 0) problems.push(`${name} is not in the consumer's own tree, yet ${list.length} copies are installed`);
+    continue;
+  }
   if (list.length === 0) problems.push(`no installed copy of ${name}`);
   for (const pkg of list) {
     const version = JSON.parse(fs.readFileSync(path.join(pkg, 'package.json'), 'utf8')).version;
@@ -457,7 +470,7 @@ if (fs.existsSync('package-lock.json')) {
   problems.push('no lockfile after install');
 }
 for (const [name, list] of Object.entries(entries)) {
-  if (list.length === 0) problems.push(`the lockfile has no entry for ${name}`);
+  if (list.length === 0 && !absent.includes(name)) problems.push(`the lockfile has no entry for ${name}`);
   for (const entry of list) {
     if (!entry.includes(pins[name])) problems.push(`lockfile entry ${entry} is not at ${pins[name]}`);
   }
@@ -526,6 +539,7 @@ while IFS= read -r line; do
   echo "$commit" >"$root/$name.commit"
   if [ "$mode" = "baseline" ]; then echo baseline; else echo check; fi >"$root/$name.mode"
   echo "-" >"$root/$name.pins"
+  : >"$root/$name.pins-absent"
   echo "no" >"$root/$name.built"
   echo "-" >"$root/$name.test-rc"
   echo "-" >"$root/$name.tests"
@@ -539,6 +553,7 @@ while IFS= read -r line; do
   fix="-"
   pins="-"
   if [ "$mode" != "baseline" ]; then
+    { cat package.json; cat package-lock.json pnpm-lock.yaml 2>/dev/null; } >"$root/$name.original-tree"
     if ! pin_overrides package.json "$manager" "${extra:-}" >"$root/$name.pin.log" 2>&1; then
       echo "| $name | $commit | - | - | pin failed | - | - | - | - |"
       failed=1
@@ -566,7 +581,7 @@ while IFS= read -r line; do
   run_step "$root/$name.install.log" "$install_cmd"; install_rc=$?
   build_rc="-"; test_rc="-"; failing="-"; unhandled="-"
   if [ "$install_rc" -eq 0 ] && [ "$mode" != "baseline" ]; then
-    if check_pins >"$root/$name.pins.log" 2>&1; then pins="ok"; else pins="failed"; fi
+    if check_pins "$root/$name.original-tree" "$root/$name.pins-absent" >"$root/$name.pins.log" 2>&1; then pins="ok"; else pins="failed"; fi
     echo "$pins" >"$root/$name.pins"
   fi
   if [ "$install_rc" -eq 0 ] && [ "$pins" != "failed" ]; then
