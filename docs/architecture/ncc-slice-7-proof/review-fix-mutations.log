@@ -1,0 +1,16 @@
+mutations in ncc-s07-review-loader, tests in ncc-s07-review-loader
+baseline exit=0
+C1-must-catch: no action is bound: KILLED exit=1 expect=killed OK
+    ✖ a bare action string binds the event class to the action with no transformer
+    ✖ a list of actions binds each one, strings and objects, in order, across every pair
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+    ✖ a true condition, sync or async, runs every step
+    ✖ an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ pairs and 0.1 entries in one list each reach their own strategy, in list order
+    ✖ step 4 resolves the action binding strategy once per pair, not once per initializer
+C2-must-survive: comment only: SURVIVED exit=0 expect=survive OK
+C3-must-refuse: syntax break: REFUSED (build failed: src/Bootstrapper.ts(349,8): error TS1359: Identifier expected. 'const' is a reserved word that cannot be used here. | src/Bootstrapper.ts(349,14): error TS1005: ',' expected.)  expect=refuse
+F1 the strategy is resolved once, on the first pair, and kept for the rest: KILLED exit=1 expect=killed OK
+    ✖ step 4 resolves the action binding strategy once per pair, not once per initializer
+mismatches=0

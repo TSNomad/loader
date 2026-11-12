@@ -16,7 +16,9 @@
 #
 # consumers.tsv has one consumer per line, tab separated, '#' for comments:
 #   name  clone-url  subdir  manager(npm|pnpm)  build-command  test-command  [extra-overrides]
-# Every field but the last is required, and a malformed row fails. The test
+# Every field but the last is required, and a malformed row fails. A list
+# that cannot be read, or that holds no consumer rows, exits 2 in every
+# mode, so a mistyped path never reads as a passing check. The test
 # command must be the consumer's real test command, not a no-op. A consumer
 # whose tests never load a pinned package also runs its built binary once in
 # that command, so its wiring runs on the new code. extra-overrides is
@@ -48,11 +50,12 @@
 # and lockfile do not mention before pinning is not in its tree. The
 # script lists it in <consumer>.pins-absent and checks that nothing
 # installed it, the one exception to the copy and lockfile checks. A
-# consumer whose pins do not hold fails, so a green row always means the
-# new code ran.
+# consumer with every named package absent fails its pin check, since its
+# row would run none of the pinned code. A consumer whose pins do not hold
+# fails, so a green row always means the new code ran.
 #
 # Tests run only when the build passed. Next to the logs, each consumer
-# gets <consumer>.mode, .pinned, .commit, .pins, .pins-absent, .built, .test-rc, .tests
+# gets <consumer>.mode, .commit, .pins, .pins-absent, .original-tree, .built, .test-rc, .tests
 # (the number of tests vitest ran), .failures (failing test names, from
 # vitest's FAIL lines), .failure-messages (each failing test with the first
 # line of its error, shared by every test vitest groups under that error),
@@ -83,7 +86,8 @@
 # the consumer.
 #
 # The script never commits or pushes in a clone. It exits 1 when any row
-# failed, 0 when all passed.
+# failed, 0 when all passed, and 2 for a usage error, such as a missing
+# argument or an unreadable or empty consumer list.
 
 set -u -o pipefail
 
@@ -110,10 +114,33 @@ list_rows() {
   done <"$1"
 }
 
+# Exits 2 when a consumer list cannot be read or holds no consumer rows.
+require_rows() {
+  if [ ! -f "$1" ] || [ ! -r "$1" ]; then
+    echo "cannot read the consumer list '$1'" >&2
+    exit 2
+  fi
+  if [ -z "$(list_rows "$1")" ]; then
+    echo "the consumer list '$1' holds no consumer rows" >&2
+    exit 2
+  fi
+}
+
+# Exits 2 with a usage message when a required argument is empty.
+need() {
+  if [ -z "$1" ]; then
+    echo "$2" >&2
+    exit 2
+  fi
+}
+
 if [ "${1:-}" = "compare" ]; then
-  list="${2:?consumer list required}"
-  IFS=',' read -r -a bases <<<"${3:?baseline run folders required}"
-  IFS=',' read -r -a runs <<<"${4:?run folders required}"
+  need "${2:-}" "compare needs a consumer list"
+  need "${3:-}" "compare needs baseline run folders"
+  need "${4:-}" "compare needs run folders"
+  list="$2"
+  IFS=',' read -r -a bases <<<"$3"
+  IFS=',' read -r -a runs <<<"$4"
   if [ "${#bases[@]}" -lt 2 ] || [ "${#runs[@]}" -lt 2 ]; then
     echo "compare needs at least two baseline folders and two run folders" >&2
     exit 2
@@ -130,6 +157,7 @@ if [ "${1:-}" = "compare" ]; then
       exit 2
     fi
   done
+  require_rows "$list"
   failed=0
   count() { printf '%s' "$1" | grep -c . || true; }
   echo "| consumer | checks | tests base/run | new failures | changed errors | unhandled base/run | flaky in baseline | no longer failing | verdict |"
@@ -237,8 +265,10 @@ if [ "${1:-}" = "compare" ]; then
   exit "$failed"
 fi
 
-consumers_file="${1:?consumers file required}"
-mode="${2:?baseline, or package=sha pairs}"
+need "${1:-}" "usage: consumer-check.sh <consumers.tsv> baseline | <package>=<sha> ..."
+need "${2:-}" "usage: consumer-check.sh <consumers.tsv> baseline | <package>=<sha> ..."
+consumers_file="$1"
+mode="$2"
 
 # The packages commit mode can pin, in run.pinned order, and their label codes.
 known_packages=(di-container event loader registry)
@@ -298,6 +328,7 @@ if [ "$mode" != "baseline" ]; then
   done
 fi
 
+require_rows "$consumers_file"
 root="$base/$label-$(date +%Y%m%dT%H%M%S)"
 if [ -e "$root" ]; then
   echo "$root already exists" >&2
@@ -382,6 +413,9 @@ const problems = [];
 const original = fs.readFileSync(originalTree, 'utf8');
 const absent = Object.keys(pins).filter((name) => !original.includes(name));
 fs.writeFileSync(absentFile, absent.map((name) => `${name} is not in this consumer's tree\n`).join(''));
+if (absent.length > 0 && absent.length === Object.keys(pins).length) {
+  problems.push(`none of the pinned packages is in this consumer's tree, so its row would run no pinned code`);
+}
 
 function srcHash(dir) {
   const hash = crypto.createHash('sha256');
