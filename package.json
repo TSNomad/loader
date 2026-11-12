@@ -26,6 +26,14 @@
     "./interfaces": {
       "types": "./dist/interfaces.d.ts",
       "default": "./dist/interfaces.js"
+    },
+    "./loader-exception": {
+      "types": "./dist/LoaderException.d.ts",
+      "default": "./dist/LoaderException.js"
+    },
+    "./ports": {
+      "types": "./dist/ports.d.ts",
+      "default": "./dist/ports.js"
     }
   },
   "files": [
@@ -36,15 +44,21 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "pretypecheck": "npm run build",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "pretest": "npm run build",
+    "test": "node --test"
   },
   "dependencies": {
-    "@tsnomad/di-container": "github:tsnomad/di-container",
-    "@tsnomad/event": "github:tsnomad/event"
+    "@tsnomad/di-container": "github:tsnomad/di-container#feat/node-commerce-connectors",
+    "@tsnomad/event": "github:tsnomad/event#feat/node-commerce-connectors"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0"
+  },
+  "overrides": {
+    "@tsnomad/di-container": "$@tsnomad/di-container"
   }
 }
