@@ -3,7 +3,9 @@
  * `new Bootstrapper($container, ...$initializers)` and `load()`, beside
  * the 0.1 array form and `bootstrap()`, and BaseInitializer.
  *
- * Packet P1 removes each `skip`. The tests of final code already run.
+ * Packet P1 implemented these and removed their `skip`, so every test
+ * here runs. The tests of code that was final before P1 ran from the
+ * start.
  */
 
 import { test } from 'node:test';

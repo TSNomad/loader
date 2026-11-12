@@ -5,7 +5,8 @@
  * strategy, recording fakes for the strategies TS Nomad has no Node
  * implementation of yet.
  *
- * Packet P1 removes each `skip`.
+ * Packet P1 implemented these and removed their `skip`, so every test
+ * here runs.
  */
 
 import { test } from 'node:test';

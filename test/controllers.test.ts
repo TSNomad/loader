@@ -6,7 +6,8 @@
  * The REST strategy is a recording fake, because @tsnomad/rest does not
  * exist until slice 8.
  *
- * Packet P1 removes each `skip`.
+ * Packet P1 implemented these and removed their `skip`, so every test
+ * here runs.
  */
 
 import { test } from 'node:test';

@@ -6,7 +6,8 @@
  * nothing, and the lazy registry pattern, where a factory broadcasts an
  * init event that a later initializer's listener answers.
  *
- * Packet P1 removes each `skip`.
+ * Packet P1 implemented these and removed their `skip`, so every test
+ * here runs.
  */
 
 import { test } from 'node:test';

@@ -4,8 +4,9 @@
  * first failing initializer. PHPNomad's loader wraps only a
  * `DiException`, with `'Failed to load ' . get_class($initializer)`.
  *
- * Packet P1 removes each `skip`. The LoaderException class itself is
- * final and its first test already runs.
+ * Packet P1 implemented these and removed their `skip`, so every test
+ * here runs. The LoaderException class was final before P1, so its test
+ * ran from the start.
  */
 
 import { test } from 'node:test';

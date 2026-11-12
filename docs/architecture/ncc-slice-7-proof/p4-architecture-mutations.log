@@ -1,0 +1,51 @@
+mutations in ncc-s07-arch2-proof-loader, tests in ncc-s07-arch2-proof-loader
+baseline exit=0
+C1-must-catch: no pair is bound: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+    ✖ a controller may need a binding a later initializer makes
+    ✖ a duplicate binding fails the load with a LoaderException naming the second initializer
+    ✖ a failed load is not rolled back: what earlier initializers and earlier steps registered stays
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+    ✖ a handler class is resolved when the event fires, so it may need a binding a later initializer makes
+    ✖ a handler may need a binding a later initializer makes
+    ✖ a later initializer is not bound yet while an earlier one loads
+    ✖ a pair binds the concrete to its abstract
+    ✖ a pair binds to a typed token, and the concrete is autowired through its inject list
+    ✖ a pair with a list of abstracts binds them all to one shared instance
+    ✖ a true condition, sync or async, runs every step
+    ✖ bootstrap(), the 0.1 entry point, runs the same steps as load()
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ every pair of every initializer is bound, in list order
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the same initializers can load into two containers
+C2-must-survive: comment only: SURVIVED exit=0 expect=survive OK
+C3-must-refuse: syntax break: REFUSED (build failed: src/Bootstrapper.ts(310,10): error TS1109: Expression expected.)  expect=refuse
+P4-1 an empty abstract list is left to the container: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+    ✖ a pair with no abstract fails the load with a LoaderException whose cause names the step and the concrete, and binds nothing
+P4-2 an abstract that is no token is left to the container: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+P4-3 an abstract named twice in one pair is left to the container: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+P4-4 an abstract an earlier pair of the answer named is left to the container: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+P4-5 an abstract the container already holds is left to the container: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+P4-6 a 0.1 record token the container already holds is left to the container: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+P4-7 each pair is bound as soon as it is checked, pair by pair: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+P4-8 the empty-list error is a TypeError, so it is not wrapped: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+    ✖ a pair with no abstract fails the load with a LoaderException whose cause names the step and the concrete, and binds nothing
+P4-9 the empty-list error does not name the step: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+    ✖ a pair with no abstract fails the load with a LoaderException whose cause names the step and the concrete, and binds nothing
+P4-10 the no-token error does not name the concrete: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+P4-11 a repeated abstract fails with a plain DiException: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+P4-12 a duplicate names the concrete, not the abstract: KILLED exit=1 expect=killed OK
+    ✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer
+mismatches=0

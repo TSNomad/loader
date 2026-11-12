@@ -5,7 +5,8 @@
  * the event fires, as PHPNomad's
  * `fn(Event $event) => $this->container->get($handler)->handle($event)`.
  *
- * Packet P1 removes each `skip`.
+ * Packet P1 implemented these and removed their `skip`, so every test
+ * here runs.
  */
 
 import { test } from 'node:test';

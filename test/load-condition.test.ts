@@ -4,7 +4,8 @@
  * asks `shouldLoad()`, and a false answer skips every later step for
  * that initializer and nothing else.
  *
- * Packet P1 removes each `skip`.
+ * Packet P1 implemented these and removed their `skip`, so every test
+ * here runs.
  */
 
 import { test } from 'node:test';

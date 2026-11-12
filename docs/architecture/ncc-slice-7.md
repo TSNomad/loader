@@ -1,11 +1,15 @@
 # Loader reshape toward PHPNomad
 
-Status: architecture. The interfaces, the type guards' signatures and
-`LoaderException` are final. `Bootstrapper.load()`, `bootstrap()`, the
-constructor's normalizing and three type guards are stubs. Packet P1,
-the implementation task for the bootstrapper, fills them in. Every
-acceptance test is written, and the tests the stubs cannot pass carry
-`test.skip`.
+Status: implemented, apart from one ruling packet P4 carries. Packet
+P1, the implementation task for the bootstrapper, built `load()`, `bootstrap()`,
+the constructor's normalizing and the shape checks, and removed every
+`skip` it was given. Packet P3 generalized the consumer check and ran it
+across the five consumers. The slice 7 review fixed two packet faults
+and found that step 3 bound each pair before it checked the next pair's
+abstracts. A ruling after the review settles that: step 3 checks
+every pair's abstracts before it binds any pair. Packet P4 implements
+the ruling, and its two acceptance tests carry `test.skip` until it does. Every
+other test runs and passes.
 
 This is slice 7 of the Siren Node commerce connectors build, the loader
 half. The registry half lives in the registry repository, in its own
@@ -45,13 +49,33 @@ The steps, for each initializer:
 3. `getClassDefinitions()`. Each `[Concrete, Abstract | Abstract[]]`
    pair goes to `container.bind(Concrete, ...abstracts)`. The 0.1
    record form, `{ token: factory }`, still works, each entry going to
-   `container.bind(token, factory)`.
+   `container.bind(token, factory)`. Before it binds any pair, the
+   bootstrapper checks every pair's abstracts, as the step 3 ruling
+   sets out (packet P4):
+   - each pair names at least one abstract,
+   - each abstract is a class, a typed token or a string token,
+   - no abstract appears twice in the answer, and
+   - no abstract, and no record token, is one the container already
+     holds.
+
+   A bad abstract fails the load with a `LoaderException` and binds
+   nothing from the answer. Its cause is a `DiException`, a
+   `DuplicateBindingError` naming the abstract for the last two checks.
+   For the first two, the message names `getClassDefinitions` and the
+   pair's concrete. The container still refuses a class that an
+   earlier `get` autowired, since the container keeps that record to
+   itself. That refusal comes at bind time, so it can leave the
+   answer's earlier pairs bound.
 4. `getEventBindings()`. For each `[EventClass, actions]` pair the
    bootstrapper resolves the `ActionBindingStrategy` and makes one
    `bindAction` call per action. A string action passes alone. An
-   `{ action, transformer }` object passes both. The bootstrapper
-   attaches a 0.1 `{ eventId, listener }` entry to the `EventStrategy`
-   as a plain listener.
+   `{ action, transformer }` object passes both, and any other key on
+   it is ignored, so a misspelled `transformer` binds the action with
+   no transformer. The bootstrapper attaches a 0.1
+   `{ eventId, listener }` entry to the `EventStrategy` as a plain
+   listener. That path runs none of step 5's handler-class checks, so
+   a class given there is attached as a function and its `handle`
+   never runs.
 5. `getListeners()`. The bootstrapper resolves the `EventStrategy`,
    then attaches each entry under its event id. It sorts each entry by
    two checks, in this order:
@@ -88,9 +112,12 @@ empty list needs none. The bootstrapper reads `EventStrategy` and
 REST strategies by the string tokens `'TaskStrategy'` and
 `'RestStrategy'`. It checks the shape of a step's whole answer before
 it binds or attaches anything, so a malformed answer registers nothing
-from that step. It awaits a strategy call's promise and lets its errors
-pass through. A strategy that throws on one entry stops the step there,
-and the entries it took before stay registered.
+from that step. The class checks test for a function with a prototype
+object, so a generator function passes them where a class belongs and
+fails later, when the container tries to construct it. It awaits a
+strategy call's promise and lets its errors pass through. A strategy
+that throws on one entry stops the step there, and the entries it took
+before stay registered.
 
 A failed load is not rolled back. What earlier initializers and earlier
 steps registered stays in the container and the strategies. `load()`
@@ -108,8 +135,9 @@ and load into it.
 ### Errors
 
 - A `DiException` from any step, `load()` included, stops the load and
-  rejects with a `LoaderException`, as in PHPNomad. Its message is
-  PHPNomad's, `Failed to load <name>`, and its cause is that same
+  rejects with a `LoaderException`, as in PHPNomad. Step 3's check of
+  the abstracts raises one of these itself, before it binds anything.
+  Its message is PHPNomad's, `Failed to load <name>`, and its cause is that same
   error. It also carries the initializer's name, its constructor name
   or `anonymous initializer` for a plain object, and its position in
   the list, counting from 1.
@@ -118,7 +146,9 @@ and load into it.
   method, the initializer and its position. Examples are
   `shouldLoad()` answering anything but a boolean, a list method
   answering anything but an array, a pair of the wrong length, and an
-  entry that is not a class where a class belongs.
+  entry that is not a class where a class belongs. A pair's concrete
+  is a shape and fails this way. Its abstracts are bindings and fail
+  as a `LoaderException`, as above.
 - Every other error passes through unchanged and stops the load. This
   covers an initializer's own methods and the strategies.
 - An error raised later, when a handler, task handler or controller is
@@ -158,8 +188,12 @@ consumers move.
 
 ## What breaks for 0.1 consumers
 
-Packet P3, the consumer check, measures each of these against the five
-consumers, and its fix patches carry only these changes.
+Packet P3, the consumer check, measured these against the five
+consumers, called consumers A to E here. All five passed its compare
+against the slice 6 baselines. The fix patches needed one change beyond
+slice 6's, the `CanSetContainer` fix below, in consumer C, and nothing
+outside this list broke a build or a test. P3 ran before P4, so the
+step 3 change has not met the consumers yet.
 
 - A later initializer's bindings are not there during an earlier
   initializer's `load()`. In 0.1 every initializer bound before any
@@ -179,6 +213,8 @@ consumers, and its fix patches carry only these changes.
   compiling only if its entries are `{ eventId, listener }` objects,
   which the new type also accepts.
 - A wrong shape is a `TypeError`. 0.1 used what it could.
+- After P4, a bad abstract anywhere in `getClassDefinitions()` binds
+  nothing from that answer. 0.1 bound the pairs before it.
 
 ## Where this differs from PHPNomad
 
@@ -187,9 +223,19 @@ TypeScript or a missing package forces these:
 - `load()` is async and awaits each step, `shouldLoad()` and the
   initializer's own `load()` included. JavaScript factories and
   listeners may be async, so the steps must wait.
-- PHP's return types reject a wrong answer at run time. TypeScript's
-  types are gone at run time, so the bootstrapper checks each answer
-  itself and throws a `TypeError`, as PHP does.
+- PHP's return types reject a wrong top-level answer at run time, such
+  as a list method answering something other than an array.
+  TypeScript's types are gone at run time, so the bootstrapper makes
+  that check itself and throws a `TypeError`, as PHP does.
+- PHPNomad keeps the steps in the `CanLoadInitializers` trait, so any
+  class can load initializers. TypeScript has no traits, so the steps
+  live in `Bootstrapper`. Its private `run` holds the loop of PHP's
+  `loadInitializers` and also the `DiException` catch that PHP puts in
+  `loadInitializer`. Neither name is public.
+- PHPNomad's `CanConditionallyLoad` trait gives any `Loadable` a
+  `load()` that calls `loadItem()` only when `shouldLoad()` is true. TS
+  Nomad has no counterpart, for the same reason. An initializer gets
+  the same effect from `HasLoadCondition`, which step 2 checks.
 - A class definition is a pair, because a TypeScript object key cannot
   be a class. A list of pairs cannot carry the container's
   concrete-to-abstract check pair by pair, so a concrete that does not
@@ -227,6 +273,18 @@ them breaks those consumers, which Charter 5012 sends to Alex.
   message, the code and the previous exception. The code is 500 in
   both.
 
+The bootstrapper also makes two choices of its own that go beyond PHP.
+Neither is forced, and neither is an open gap, since PHP has no rule
+for either:
+
+- It checks every entry of an answer, not only the top-level type. PHP
+  checks that a list method answers an array and leaves its entries to
+  fail wherever they are used.
+- It checks a step's whole answer before it registers anything from
+  it, so a bad entry registers nothing from that step. PHP registers
+  each entry as it reads it. The step 3 ruling extends this to its
+  abstracts.
+
 ## Dependencies
 
 The loader depends on di-container and event at
@@ -249,8 +307,10 @@ belongs to the merge to main.
 | `src/interfaces.ts` | `ClassDefinition`, `HasClassDefinitions`, `HasLoadCondition`, `Loadable`, the `Initializer` shape, the type guards, and the re-exports from the container and event packages |
 | `src/ports.ts` | The task and REST shapes the loader calls, and their string tokens |
 | `src/LoaderException.ts` | `LoaderException`, final |
-| `src/Bootstrapper.ts` | `Bootstrapper`, with `load()` and `bootstrap()` as stubs for P1 |
+| `src/Bootstrapper.ts` | `Bootstrapper`, built by P1. P4 changes step 3 |
+| `src/shapes.ts` | The shape checks P1 split out, internal to the package |
 | `src/BaseInitializer.ts` | `BaseInitializer`, final |
+| `scripts/consumer-check.sh` | The consumer check P3 generalized to pin any of the four TS Nomad packages |
 
 ## Acceptance tests
 
@@ -258,7 +318,7 @@ belongs to the merge to main.
 |---|---|---|
 | `test/load-order.test.ts` | 7 | the exact step log for one initializer, one initializer finishing before the next, the container each receives, awaited steps |
 | `test/load-condition.test.ts` | 7 | a false condition stops after `shouldLoad`, async conditions, a non-boolean answer |
-| `test/class-definitions.test.ts` | 9 | pairs, abstract lists, typed tokens, the record form, duplicates, malformed answers |
+| `test/class-definitions.test.ts` | 10 | pairs, abstract lists, typed tokens, the record form, duplicates, malformed answers, and two P4 tests: a pair with no abstract, and a bad abstract on a later pair binding nothing |
 | `test/event-bindings.test.ts` | 10 | string and object actions, transformers, 0.1 entries, strategy errors, malformed answers |
 | `test/listeners.test.ts` | 17 | plain functions, handler classes and ES5 constructors resolved on broadcast, the strategy resolved before the record, a strategy failing mid-list, malformed answers |
 | `test/task-handlers.test.ts` | 10 | handlers resolved when the task runs, failures reaching the strategy, the strategy resolved before the list, malformed answers |
@@ -269,9 +329,13 @@ belongs to the merge to main.
 | `test/package-exports.test.ts` | 1 | the public entry points, imported by package name |
 | `test/loader-type-safety.ts` | 12 rejected calls | compile-only: each interface and port rejects the wrong shape |
 
-That is 90 runtime tests. `npm test` reports 92, because it also counts
-the fixtures file and the compile-only file as empty passes.
-`npm run typecheck` checks the compile-only file.
+That is 91 acceptance tests at run time, 2 of them skipped for P4.
+Beside them run 9 unit tests, in `test/shapes.test.ts` and
+`test/bootstrapper-internals.test.ts`. P1 wrote eight, and the review
+added the ninth. `npm test` reports 102: the 100 runtime tests and the fixtures
+file and the compile-only file, each counted as an empty pass. Today
+100 pass and 2 are skipped. `npm run typecheck` checks the
+compile-only file.
 
 Every test wires a real `Container` and, where events matter, the real
 `InMemoryEventStrategy`. The action binding, task and REST strategies
@@ -284,17 +348,22 @@ logger tripwire. Every failure surfaces as a rejection the tests check.
 
 - P1, the bootstrapper (`src/Bootstrapper.ts`, and the three stub
   guards in `src/interfaces.ts`). It owns `load()`, `bootstrap()`, the
-  constructor's normalizing and the shape checks.
+  constructor's normalizing and the shape checks. Done.
 - P3, the consumer check across the five consumers, pinning
-  di-container, event, loader and registry.
+  di-container, event, loader and registry. Done.
+- P4, the step 3 ruling. It checks every pair's abstracts before
+  binding any pair, removes the `skip` from the two tests above, and
+  brings the `Bootstrapper` class comment's step 3 in line with this
+  note. Open.
 
-The registry repository's note covers P2.
+The registry repository's note covers P2 and P5.
 
 ## Proof
 
 The proof folder (`ncc-slice-7-proof/`) holds the mutation lists and
-their logs. Each list ran against a scratch implementation in a
-separate clone that is never committed, with every `skip` removed.
-Every guard has one mutation, and each run starts with three controls.
-That folder's README gives the counts and says how to rerun the type
-list here.
+their logs. The architecture lists ran against scratch implementations
+in separate clones that are never committed, with every `skip` removed.
+P1's list, and the review's spot and fix lists, ran against the
+committed code. Every guard has one mutation, and each run starts with
+three controls. That folder's README gives the counts and says which
+lists rerun on this branch.

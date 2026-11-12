@@ -4,7 +4,11 @@
  * record form goes to `bind(token, factory)`, and a malformed answer
  * binds nothing from that initializer.
  *
- * Packet P1 removes each `skip`.
+ * Packet P1 implemented these and removed their `skip`. A ruling after
+ * the slice 7 review made step 3 check every pair's abstracts before it
+ * binds any pair, so a bad abstract fails with a `LoaderException` and
+ * binds nothing. The two tests that pin it carry `skip` until packet P4
+ * implements it.
  */
 
 import { test } from 'node:test';
@@ -140,12 +144,65 @@ test('a duplicate binding fails the load with a LoaderException naming the secon
   );
 });
 
-test('a pair with no abstract fails the load with the container error as the cause', async () => {
+test.skip('a pair with no abstract fails the load with a LoaderException whose cause names the step and the concrete, and binds nothing', async () => {
   const container = new Container();
   await assert.rejects(
     new Bootstrapper(container, [definitions(() => [[MemoryStore, []]])]).load(),
-    (error: unknown) => error instanceof LoaderException && error.cause instanceof DiException
+    (error: unknown) => {
+      assert.ok(error instanceof LoaderException);
+      assert.equal(error.position, 1);
+      assert.ok(error.cause instanceof DiException);
+      assert.match((error.cause as Error).message, /getClassDefinitions/);
+      assert.match((error.cause as Error).message, /MemoryStore/);
+      return true;
+    }
   );
+  assert.deepEqual(container.getTokens(), []);
+});
+
+test.skip('a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer', async () => {
+  const cases: Array<{ label: string; earlier?: unknown; answer: unknown; duplicate?: string; bound: unknown[] }> = [
+    { label: 'a later pair with no abstract', answer: [[MemoryStore, Store], [SystemClock, []]], bound: [] },
+    { label: 'a later pair whose abstract is no token', answer: [[MemoryStore, Store], [SystemClock, [Clock, 42]]], bound: [] },
+    { label: 'a later pair whose single abstract is null', answer: [[MemoryStore, Store], [SystemClock, null]], bound: [] },
+    { label: 'a later pair naming an earlier pair\'s abstract', answer: [[MemoryStore, Store], [Cache, Store]], duplicate: 'Store', bound: [] },
+    { label: 'a pair naming one abstract twice', answer: [[MemoryStore, Store], [SystemClock, [Clock, Clock]]], duplicate: 'Clock', bound: [] },
+    {
+      label: 'a later pair naming an abstract an earlier initializer bound',
+      earlier: [[SystemClock, Clock]],
+      answer: [[MemoryStore, Store], [Cache, Clock]],
+      duplicate: 'Clock',
+      bound: ['Clock'],
+    },
+    {
+      label: 'a 0.1 record naming a token an earlier initializer bound',
+      earlier: [[MemoryStore, 'Logger']],
+      answer: { Value: () => 42, Logger: () => ({}) },
+      duplicate: 'Logger',
+      bound: ['Logger'],
+    },
+  ];
+
+  for (const { label, earlier, answer, duplicate, bound } of cases) {
+    const container = new Container();
+    const initializers = earlier === undefined ? [definitions(() => answer)] : [definitions(() => earlier), definitions(() => answer)];
+    await assert.rejects(new Bootstrapper(container, initializers).load(), (error: unknown) => {
+      assert.ok(error instanceof LoaderException, `${label} gave ${String(error)}`);
+      assert.equal(error.position, initializers.length, label);
+      if (duplicate === undefined) {
+        assert.ok(error.cause instanceof DiException, `${label} cause ${String(error.cause)}`);
+        assert.match((error.cause as Error).message, /getClassDefinitions/, label);
+        assert.match((error.cause as Error).message, /SystemClock/, label);
+      } else {
+        assert.ok(error.cause instanceof DuplicateBindingError, `${label} cause ${String(error.cause)}`);
+        assert.equal(error.cause.token, duplicate, label);
+      }
+      return true;
+    });
+    assert.deepEqual(container.getTokens(), bound, `${label} bound ${String(container.getTokens())}`);
+    assert.equal(container.has(Store), false, `${label} bound Store`);
+    assert.equal(container.has('Value'), false, `${label} bound Value`);
+  }
 });
 
 test('an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing', async () => {
