@@ -1,0 +1,35 @@
+mutations in ncc-s07-review-loader, tests in ncc-s07-review-loader
+baseline exit=0
+C1-must-catch: controllers never registered: KILLED exit=1 expect=killed OK
+    ✖ a controller may need a binding a later initializer makes
+    ✖ a getter does not build its controller until the strategy calls it
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+    ✖ a true condition, sync or async, runs every step
+    ✖ an initializer with only some methods runs only those steps, in the same order
+    ✖ each controller registers one route whose getter resolves the controller from the container
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ routes register in list order across initializers, with one strategy resolve
+C2-must-survive: comment only: SURVIVED exit=0 expect=survive OK
+C3-must-refuse: syntax break: REFUSED (build failed: src/Bootstrapper.ts(250,6): error TS1109: Expression expected.)  expect=refuse
+V1 class definitions bind each pair as it is checked: KILLED exit=1 expect=killed OK
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+V2 an action transformer that is not a function is accepted: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+V3 a 0.1 binding entry with a non-function listener is accepted: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+V4 a class with no handle on its prototype loads as a plain listener: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+V5 task handlers attach as they are checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+V6 controllers register as they are checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+V7 setContainer runs after the load condition: KILLED exit=1 expect=killed OK
+    ✖ a condition that resolves false skips every step after it
+    ✖ a condition that throws stops the load with its own error, unchanged
+    ✖ a false condition skips every step after it, and the container was set before the question
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+    ✖ a true condition, sync or async, runs every step
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the condition is asked after setContainer and before the class definitions
+mismatches=0
