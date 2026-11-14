@@ -1,0 +1,477 @@
+mutations in ncc-s07-proof-loader, tests in ncc-s07-proof-loader
+baseline exit=0
+C1-must-catch: skip load(): KILLED exit=1 expect=killed OK
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+    ✖ a bootstrapper is Loadable, so it can be an initializer of another bootstrapper
+    ✖ a failed load is not rolled back: what earlier initializers and earlier steps registered stays
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+    ✖ a later initializer is not bound yet while an earlier one loads
+    ✖ a plain object initializer is named anonymous initializer, with its position
+    ✖ a rejected promise from load() that is not a DiException passes through unchanged
+    ✖ a true condition, sync or async, runs every step
+    ✖ an async load finishes before the next initializer starts
+    ✖ an error that is not a DiException passes through unchanged, from every method an initializer has
+    ✖ an initializer with only some methods runs only those steps, in the same order
+    ✖ bootstrap(), the 0.1 entry point, runs the same steps as load()
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ every DiException subclass is wrapped, and the cause is the same object
+    ✖ initializers given as one array, the 0.1 form, load in order
+    ✖ initializers given as separate arguments load in order, as in PHPNomad
+    ✖ load resolves only after the last initializer has loaded
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the load stops at the first failing initializer, and later initializers never start
+C2-must-survive: comment only: SURVIVED exit=0 expect=survive OK
+C3-must-refuse: syntax break: REFUSED (build failed: src/Bootstrapper.ts(232,4): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected. | src/Bootstrapper.ts(242,20): error TS1005: ',' expected.)  expect=refuse
+O2 setContainer for every initializer first (phase order, 0.1): KILLED exit=1 expect=killed OK
+    ✖ a condition that throws stops the load with its own error, unchanged
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+    ✖ an async attach on the event strategy is awaited too
+    ✖ an async load finishes before the next initializer starts
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ the load stops at the first failing initializer, and later initializers never start
+O6 controllers before task handlers: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+O7 class definitions after event bindings: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+O9 event strategy resolved after the record is read: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load
+O10 task strategy resolved after the list is read: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+O11 REST strategy resolved after the list is read: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ an initializer with only some methods runs only those steps, in the same order
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+O1 setContainer after shouldLoad: KILLED exit=1 expect=killed OK
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+    ✖ an async load finishes before the next initializer starts
+    ✖ an error that is not a DiException passes through unchanged, from every method an initializer has
+    ✖ an initializer that binds the event strategy in its record form serves its own listeners and later ones
+    ✖ an initializer with only some methods runs only those steps, in the same order
+    ✖ bootstrap(), the 0.1 entry point, runs the same steps as load()
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ each initializer receives the bootstrapper container itself
+    ✖ the load stops at the first failing initializer, and later initializers never start
+O3 every load() after every initializer (phase order, 0.1): KILLED exit=1 expect=killed OK
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+    ✖ a condition that resolves false skips every step after it
+    ✖ a failed load is not rolled back: what earlier initializers and earlier steps registered stays
+    ✖ a false condition skips every step after it, and the container was set before the question
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+    ✖ a later initializer is not bound yet while an earlier one loads
+    ✖ a plain object initializer is named anonymous initializer, with its position
+    ✖ an async load finishes before the next initializer starts
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ every DiException subclass is wrapped, and the cause is the same object
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+    ✖ the load stops at the first failing initializer, and later initializers never start
+O4 listeners before event bindings: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+O8 task handlers before listeners: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+O5 load() not awaited: KILLED exit=1 expect=killed OK
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+    ✖ a rejected promise from load() that is not a DiException passes through unchanged
+    ✖ an async load finishes before the next initializer starts
+    ✖ load resolves only after the last initializer has loaded
+L4 non-boolean answer wrapped in a LoaderException: KILLED exit=1 expect=killed OK
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+L1 ignore a false condition: KILLED exit=1 expect=killed OK
+    ✖ a condition that resolves false skips every step after it
+    ✖ a false condition skips every step after it, and the container was set before the question
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+L2 condition not awaited: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+L3 any non-boolean answer loads (truthy check): KILLED exit=1 expect=killed OK
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+L6 hasLoadCondition guard always false: KILLED exit=1 expect=killed OK
+    ✖ each type guard answers true when the method is there and false when it is not
+D1 pairs bind only the first abstract: KILLED exit=1 expect=killed OK
+    ✖ a pair with a list of abstracts binds them all to one shared instance
+D2 a pair with a list binds each abstract separately: KILLED exit=1 expect=killed OK
+    ✖ a pair with a list of abstracts binds them all to one shared instance
+    ✖ a pair with no abstract fails the load with the container error as the cause
+D3 record form ignored: KILLED exit=1 expect=killed OK
+    ✖ an initializer that binds the event strategy in its record form serves its own listeners and later ones
+    ✖ the 0.1 record form binds each token to its factory, cached as 0.1 did
+D4 record form binds transient: KILLED exit=1 expect=killed OK
+    ✖ an initializer that binds the event strategy in its record form serves its own listeners and later ones
+    ✖ the 0.1 record form binds each token to its factory, cached as 0.1 did
+D5 pairs bound in reverse: KILLED exit=1 expect=killed OK
+    ✖ every pair of every initializer is bound, in list order
+D6 no shape check on pairs: KILLED exit=1 expect=killed OK
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+D7 pair length not checked: KILLED exit=1 expect=killed OK
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+D8 concrete type not checked: KILLED exit=1 expect=killed OK
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+D9 validate while binding, not before: KILLED exit=1 expect=killed OK
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+D10 any object counts as a record (promise, Map, class): KILLED exit=1 expect=killed OK
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+D11 record factory type not checked: KILLED exit=1 expect=killed OK
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+D12 null or undefined answer skipped: KILLED exit=1 expect=killed OK
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+E1 bare string passes an empty transformer: KILLED exit=1 expect=killed OK
+    ✖ a bare action string binds the event class to the action with no transformer
+    ✖ a list of actions binds each one, strings and objects, in order, across every pair
+E2 action object drops its transformer: KILLED exit=1 expect=killed OK
+    ✖ a list of actions binds each one, strings and objects, in order, across every pair
+    ✖ an action object passes its own transformer
+E4 action strategy resolved even for an empty list: KILLED exit=1 expect=killed OK
+    ✖ a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy
+    ✖ an empty list resolves no strategy, so it loads with none bound
+E5 0.1 entry resolves the action strategy too: KILLED exit=1 expect=killed OK
+    ✖ a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy
+E6 0.1 entries ignored: KILLED exit=1 expect=killed OK
+    ✖ a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy
+    ✖ pairs and 0.1 entries in one list each reach their own strategy, in list order
+E8 strategy error wrapped: KILLED exit=1 expect=killed OK
+    ✖ a condition that throws stops the load with its own error, unchanged
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+    ✖ a rejected promise from load() that is not a DiException passes through unchanged
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+    ✖ an async attach on the event strategy is awaited too
+    ✖ an attach that throws stops the load unchanged, and the listeners attached before it stay attached
+    ✖ an error that is not a DiException passes through unchanged, from every method an initializer has
+    ✖ an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged
+E12 action of any type accepted as a name: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E14 transformer type not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E17 register while validating: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+    ✖ pairs and 0.1 entries in one list each reach their own strategy, in list order
+E3 list of actions binds only the first: KILLED exit=1 expect=killed OK
+    ✖ a list of actions binds each one, strings and objects, in order, across every pair
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E9 no list check: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E10 pair arity not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E11 pair event not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E13 action object needs no name: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E15 0.1 entry listener not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E16 0.1 entry id not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+E18 strategy result not awaited: KILLED exit=1 expect=killed OK
+    ✖ a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy
+    ✖ a bare action string binds the event class to the action with no transformer
+    ✖ a list of actions binds each one, strings and objects, in order, across every pair
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+    ✖ a true condition, sync or async, runs every step
+    ✖ an action object passes its own transformer
+    ✖ an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged
+    ✖ bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ pairs and 0.1 entries in one list each reach their own strategy, in list order
+N1 handler classes called as functions: KILLED exit=1 expect=killed OK
+    ✖ a constructor function whose prototype has handle is a handler class too, resolved from the container
+    ✖ a handler class is resolved from the container and its handle receives the event
+    ✖ a handler class is resolved when the event fires, so it may need a binding a later initializer makes
+    ✖ a handler that cannot be resolved fails the broadcast, not the load
+    ✖ an error from handle reaches the broadcast unchanged
+    ✖ broadcast waits for an async handler's handle to settle
+    ✖ the handler is not built during load, only when its event fires
+N2 handler resolved eagerly at load: KILLED exit=1 expect=killed OK
+    ✖ the handler is not built during load, only when its event fires
+N6 plain listener wrapped, not attached itself: KILLED exit=1 expect=killed OK
+    ✖ a plain function is attached itself, by event id, at the default priority
+N8 event strategy resolved only for a non-empty record: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load
+N9 listener strategy read by the default token, ignoring the option: KILLED exit=1 expect=killed OK
+    ✖ the 0.1 bootstrap option reads the event strategy by the token it names
+N10 attach result not awaited: KILLED exit=1 expect=killed OK
+    ✖ an async attach on the event strategy is awaited too
+N11 attach with priority 0: KILLED exit=1 expect=killed OK
+    ✖ a plain function is attached itself, by event id, at the default priority
+N14 register while validating: KILLED exit=1 expect=killed OK
+    ✖ a constructor function whose prototype has handle is a handler class too, resolved from the container
+    ✖ a handler class is resolved from the container and its handle receives the event
+    ✖ a handler class is resolved when the event fires, so it may need a binding a later initializer makes
+    ✖ a handler that cannot be resolved fails the broadcast, not the load
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+    ✖ an error from handle reaches the broadcast unchanged
+    ✖ broadcast waits for an async handler's handle to settle
+    ✖ the handler is not built during load, only when its event fires
+N16 handler classes told apart by class syntax, not by prototype.handle: KILLED exit=1 expect=killed OK
+    ✖ a constructor function whose prototype has handle is a handler class too, resolved from the container
+N17 attach errors swallowed: KILLED exit=1 expect=killed OK
+    ✖ an async attach on the event strategy is awaited too
+    ✖ an attach that throws stops the load unchanged, and the listeners attached before it stay attached
+N15 a class with no handle method attached as a plain listener: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+N3 handler built with new, not through the container: KILLED exit=1 expect=killed OK
+    ✖ a handler class is resolved from the container and its handle receives the event
+    ✖ a handler class is resolved when the event fires, so it may need a binding a later initializer makes
+    ✖ a handler that cannot be resolved fails the broadcast, not the load
+N4 handle not awaited: KILLED exit=1 expect=killed OK
+    ✖ broadcast waits for an async handler's handle to settle
+N5 handle errors swallowed: KILLED exit=1 expect=killed OK
+    ✖ a handler that cannot be resolved fails the broadcast, not the load
+    ✖ an error from handle reaches the broadcast unchanged
+N7 only the first listener of a list: KILLED exit=1 expect=killed OK
+    ✖ a list of listeners runs in list order, for each event id
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+N12 any object counts as a record: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+N13 entry type not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+T2 task handler resolved at load: KILLED exit=1 expect=killed OK
+    ✖ a handler may need a binding a later initializer makes
+    ✖ the handler is resolved through the container when the task runs, not during load
+T6 task strategy resolved only for a non-empty list: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+T7 task attach not awaited: KILLED exit=1 expect=killed OK
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+T11 handler type not checked at all: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+T14 a handler with no handle method accepted: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+T1 task handler built with new: KILLED exit=1 expect=killed OK
+    ✖ a handler may need a binding a later initializer makes
+    ✖ a handler that cannot be resolved rejects the function the strategy runs with the container error unchanged
+    ✖ the handler is resolved through the container when the task runs, not during load
+T3 task handle not awaited: KILLED exit=1 expect=killed OK
+    ✖ a failing handler rejects the function the strategy runs, so the strategy sees the failure
+    ✖ the function the strategy runs settles only after the handler's handle settles
+T4 task handler errors swallowed: KILLED exit=1 expect=killed OK
+    ✖ a failing handler rejects the function the strategy runs, so the strategy sees the failure
+    ✖ a handler that cannot be resolved rejects the function the strategy runs with the container error unchanged
+T5 only the first handler of a list: KILLED exit=1 expect=killed OK
+    ✖ a failing handler rejects the function the strategy runs, so the strategy sees the failure
+    ✖ a list of handlers attaches each one, in order, across every pair, with one strategy resolve
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+T8 no list check: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+T9 pair arity not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+T10 task class not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+T12 not-a-pair accepted: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+T13 hasTaskHandlers guard always false: KILLED exit=1 expect=killed OK
+    ✖ each type guard answers true when the method is there and false when it is not
+R1 controller built at load: KILLED exit=1 expect=killed OK
+    ✖ a controller may need a binding a later initializer makes
+    ✖ a getter does not build its controller until the strategy calls it
+R2 controller built with new: KILLED exit=1 expect=killed OK
+    ✖ a controller may need a binding a later initializer makes
+    ✖ each controller registers one route whose getter resolves the controller from the container
+R3 REST strategy resolved only for a non-empty list: KILLED exit=1 expect=killed OK
+    ✖ a true condition, sync or async, runs every step
+    ✖ an initializer with only some methods runs only those steps, in the same order
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+R4 registerRoute not awaited: KILLED exit=1 expect=killed OK
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+R7 only the first controller: KILLED exit=1 expect=killed OK
+    ✖ each controller registers one route whose getter resolves the controller from the container
+    ✖ routes register in list order across initializers, with one strategy resolve
+R5 no list check: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+R6 entry type not checked: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+R10 an arrow function accepted as a controller: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+R8 hasControllers guard always false: KILLED exit=1 expect=killed OK
+    ✖ each type guard answers true when the method is there and false when it is not
+X1 DiException passes through unwrapped: KILLED exit=1 expect=killed OK
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+    ✖ a duplicate binding fails the load with a LoaderException naming the second initializer
+    ✖ a failed load is not rolled back: what earlier initializers and earlier steps registered stays
+    ✖ a pair with no abstract fails the load with the container error as the cause
+    ✖ a plain object initializer is named anonymous initializer, with its position
+    ✖ bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error
+    ✖ controllers with no REST strategy bound fail the load with a LoaderException and the container error
+    ✖ every DiException subclass is wrapped, and the cause is the same object
+    ✖ handlers with no task strategy bound fail the load with a LoaderException and the container error
+    ✖ listeners with no event strategy bound fail the load with a LoaderException and the container error
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+    ✖ the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+    ✖ the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load
+    ✖ the load stops at the first failing initializer, and later initializers never start
+    ✖ the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+X2 shape errors wrapped in a LoaderException: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+X3 cause is a copy, not the error: KILLED exit=1 expect=killed OK
+    ✖ a duplicate binding fails the load with a LoaderException naming the second initializer
+    ✖ bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error
+    ✖ controllers with no REST strategy bound fail the load with a LoaderException and the container error
+    ✖ every DiException subclass is wrapped, and the cause is the same object
+    ✖ handlers with no task strategy bound fail the load with a LoaderException and the container error
+    ✖ listeners with no event strategy bound fail the load with a LoaderException and the container error
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+    ✖ the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+    ✖ the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load
+    ✖ the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+X7 a failure does not stop later initializers: KILLED exit=1 expect=killed OK
+    ✖ the load stops at the first failing initializer, and later initializers never start
+X8 shape error is not a TypeError: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+X9 shape error does not name the initializer: KILLED exit=1 expect=killed OK
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+X10 LoaderException message carries the position: KILLED exit=1 expect=killed OK
+    ✖ LoaderException carries the initializer, its position and the cause, and its message is PHPNomad's
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+X12 bindings applied only after the initializer loads: KILLED exit=1 expect=killed OK
+    ✖ a failed load is not rolled back: what earlier initializers and earlier steps registered stays
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+    ✖ a true condition, sync or async, runs every step
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ the same initializers can load into two containers
+X13 LoaderException carries no code: KILLED exit=1 expect=killed OK
+    ✖ LoaderException carries the initializer, its position and the cause, and its message is PHPNomad's
+X11 a second load is skipped: KILLED exit=1 expect=killed OK
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+X4 position counts from 0: KILLED exit=1 expect=killed OK
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+    ✖ a duplicate binding fails the load with a LoaderException naming the second initializer
+    ✖ a plain object initializer is named anonymous initializer, with its position
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+    ✖ the load stops at the first failing initializer, and later initializers never start
+X5 name always the constructor name: KILLED exit=1 expect=killed OK
+    ✖ a plain object initializer is named anonymous initializer, with its position
+X6 name is the step, not the initializer: KILLED exit=1 expect=killed OK
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+    ✖ a duplicate binding fails the load with a LoaderException naming the second initializer
+    ✖ a plain object initializer is named anonymous initializer, with its position
+    ✖ bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error
+    ✖ controllers with no REST strategy bound fail the load with a LoaderException and the container error
+    ✖ handlers with no task strategy bound fail the load with a LoaderException and the container error
+    ✖ listeners with no event strategy bound fail the load with a LoaderException and the container error
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+    ✖ the load stops at the first failing initializer, and later initializers never start
+S2 variadic form keeps only the first: KILLED exit=1 expect=killed OK
+    ✖ a bootstrapper is Loadable, so it can be an initializer of another bootstrapper
+    ✖ initializers given as separate arguments load in order, as in PHPNomad
+S3 array form treated as one initializer: KILLED exit=1 expect=killed OK
+    ✖ a 0.1 event with only an instance getId reaches a listener the loader attached by id
+    ✖ a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy
+    ✖ a DiException thrown from load() becomes a LoaderException with it as the cause
+    ✖ a bare action string binds the event class to the action with no transformer
+    ✖ a condition that resolves false skips every step after it
+    ✖ a condition that throws stops the load with its own error, unchanged
+    ✖ a constructor function whose prototype has handle is a handler class too, resolved from the container
+    ✖ a controller may need a binding a later initializer makes
+    ✖ a duplicate binding fails the load with a LoaderException naming the second initializer
+    ✖ a failed load is not rolled back: what earlier initializers and earlier steps registered stays
+    ✖ a failing handler rejects the function the strategy runs, so the strategy sees the failure
+    ✖ a false condition skips every step after it, and the container was set before the question
+    ✖ a false condition skips only its own initializer, and the next one loads in full
+    ✖ a function with a prototype but no handle method is a plain listener, called with the event
+    ✖ a getter does not build its controller until the strategy calls it
+    ✖ a handler class is attached for its task class, and running the task calls its handle with the task
+    ✖ a handler class is resolved from the container and its handle receives the event
+    ✖ a handler class is resolved when the event fires, so it may need a binding a later initializer makes
+    ✖ a handler may need a binding a later initializer makes
+    ✖ a handler that cannot be resolved fails the broadcast, not the load
+    ✖ a handler that cannot be resolved rejects the function the strategy runs with the container error unchanged
+    ✖ a later initializer is not bound yet while an earlier one loads
+    ✖ a list of actions binds each one, strings and objects, in order, across every pair
+    ✖ a list of handlers attaches each one, in order, across every pair, with one strategy resolve
+    ✖ a list of listeners runs in list order, for each event id
+    ✖ a malformed answer fails the load with a TypeError and attaches nothing from it
+    ✖ a malformed answer fails the load with a TypeError and binds nothing from it
+    ✖ a malformed answer fails the load with a TypeError and registers nothing from it
+    ✖ a pair binds the concrete to its abstract
+    ✖ a pair binds to a typed token, and the concrete is autowired through its inject list
+    ✖ a pair with a list of abstracts binds them all to one shared instance
+    ✖ a pair with no abstract fails the load with the container error as the cause
+    ✖ a plain function is attached itself, by event id, at the default priority
+    ✖ a plain function listener hears its event
+    ✖ a plain object initializer is named anonymous initializer, with its position
+    ✖ a promise a strategy returns is awaited, so its rejection stops the load unchanged
+    ✖ a rejected promise from load() that is not a DiException passes through unchanged
+    ✖ a true condition, sync or async, runs every step
+    ✖ an action object passes its own transformer
+    ✖ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing
+    ✖ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step
+    ✖ an async attach on the event strategy is awaited too
+    ✖ an async load finishes before the next initializer starts
+    ✖ an attach that throws stops the load unchanged, and the listeners attached before it stay attached
+    ✖ an error from handle reaches the broadcast unchanged
+    ✖ an error that is not a DiException passes through unchanged, from every method an initializer has
+    ✖ an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged
+    ✖ an initializer that binds the event strategy in its record form serves its own listeners and later ones
+    ✖ an initializer with only some methods runs only those steps, in the same order
+    ✖ bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error
+    ✖ bootstrap(), the 0.1 entry point, runs the same steps as load()
+    ✖ broadcast waits for an async handler's handle to settle
+    ✖ controllers with no REST strategy bound fail the load with a LoaderException and the container error
+    ✖ each controller registers one route whose getter resolves the controller from the container
+    ✖ each initializer finishes every step before the next initializer starts
+    ✖ each initializer receives the bootstrapper container itself
+    ✖ every DiException subclass is wrapped, and the cause is the same object
+    ✖ every pair of every initializer is bound, in list order
+    ✖ handlers with no task strategy bound fail the load with a LoaderException and the container error
+    ✖ initializers given as one array, the 0.1 form, load in order
+    ✖ listeners with no event strategy bound fail the load with a LoaderException and the container error
+    ✖ load resolves only after the last initializer has loaded
+    ✖ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding
+    ✖ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load
+    ✖ pairs and 0.1 entries in one list each reach their own strategy, in list order
+    ✖ routes register in list order across initializers, with one strategy resolve
+    ✖ the 0.1 bootstrap option reads the event strategy by the token it names
+    ✖ the 0.1 record form binds each token to its factory, cached as 0.1 did
+    ✖ the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+    ✖ the condition is asked after setContainer and before the class definitions
+    ✖ the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load
+    ✖ the function the strategy runs settles only after the handler's handle settles
+    ✖ the handler is not built during load, only when its event fires
+    ✖ the handler is resolved through the container when the task runs, not during load
+    ✖ the load stops at the first failing initializer, and later initializers never start
+    ✖ the same initializers can load into two containers
+    ✖ the strategy bound under the 0.1 string token is the one the loader uses
+    ✖ the strategy is resolved once for an initializer with several bindings
+    ✖ the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load
+S4 bootstrap ignores the option: KILLED exit=1 expect=killed OK
+    ✖ the 0.1 bootstrap option reads the event strategy by the token it names
+S5 bootstrap does nothing: KILLED exit=1 expect=killed OK
+    ✖ a 0.1 event with only an instance getId reaches a listener the loader attached by id
+    ✖ an initializer that binds the event strategy in its record form serves its own listeners and later ones
+    ✖ bootstrap(), the 0.1 entry point, runs the same steps as load()
+    ✖ the 0.1 bootstrap option reads the event strategy by the token it names
+S7 guards answer true for a non-function: KILLED exit=1 expect=killed OK
+    ✖ each type guard answers true when the method is there and false when it is not
+mismatches=0

@@ -1,0 +1,163 @@
+
+> @tsnomad/loader@0.1.0 pretest
+> npm run build
+
+
+> @tsnomad/loader@0.1.0 build
+> tsc -p tsconfig.json
+
+
+> @tsnomad/loader@0.1.0 test
+> node --test
+
+✔ a promise bindAction returns for an action with a transformer is awaited, so its rejection stops the load (2.943478ms)
+✔ a promise the event strategy returns for a 0.1 { eventId, listener } entry is awaited, so its rejection stops the load (0.699833ms)
+✔ step 4 resolves the action binding strategy once per pair, not once per initializer (1.591147ms)
+✔ initializers given as separate arguments load in order, as in PHPNomad (2.012051ms)
+✔ initializers given as one array, the 0.1 form, load in order (0.333779ms)
+✔ bootstrap(), the 0.1 entry point, runs the same steps as load() (0.676406ms)
+✔ a bootstrapper with no initializers loads (0.253175ms)
+✔ a bootstrapper is Loadable, so it can be an initializer of another bootstrapper (0.542602ms)
+✔ the same initializers can load into two containers (0.931444ms)
+✔ getContainer returns the container the bootstrapper was given (0.276136ms)
+✔ BaseInitializer keeps the container and returns itself, as PHPNomad setContainer does (0.25115ms)
+✔ each type guard answers true when the method is there and false when it is not (0.335548ms)
+✔ a pair binds the concrete to its abstract (2.601213ms)
+✔ a pair with a list of abstracts binds them all to one shared instance (0.468051ms)
+✔ a pair binds to a typed token, and the concrete is autowired through its inject list (0.500236ms)
+✔ the 0.1 record form binds each token to its factory, cached as 0.1 did (0.418243ms)
+✔ every pair of every initializer is bound, in list order (1.029889ms)
+✔ an empty list binds nothing and loads (0.251695ms)
+✔ a duplicate binding fails the load with a LoaderException naming the second initializer (1.055524ms)
+✖ a pair with no abstract fails the load with a LoaderException whose cause names the step and the concrete, and binds nothing (1.310643ms)
+✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer (0.862646ms)
+✔ an answer that is neither a list of pairs nor a plain record fails the load with a TypeError and binds nothing (1.583787ms)
+✔ each controller registers one route whose getter resolves the controller from the container (1.92128ms)
+✔ a getter does not build its controller until the strategy calls it (0.350577ms)
+✔ a controller may need a binding a later initializer makes (0.633132ms)
+✔ routes register in list order across initializers, with one strategy resolve (0.938778ms)
+✔ controllers with no REST strategy bound fail the load with a LoaderException and the container error (0.839197ms)
+✔ the REST strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load (0.340426ms)
+✔ a malformed answer fails the load with a TypeError and registers nothing from it (2.966677ms)
+✔ LoaderException carries the initializer, its position and the cause, and its message is PHPNomad's (1.039973ms)
+✔ a DiException thrown from load() becomes a LoaderException with it as the cause (0.979659ms)
+✔ every DiException subclass is wrapped, and the cause is the same object (0.634292ms)
+✔ an error that is not a DiException passes through unchanged, from every method an initializer has (1.199006ms)
+✔ a rejected promise from load() that is not a DiException passes through unchanged (0.214928ms)
+✔ the load stops at the first failing initializer, and later initializers never start (0.871048ms)
+✔ load() runs every step again when called again, so a second load into the same container fails at the first duplicate binding (0.519606ms)
+✔ a failed load is not rolled back: what earlier initializers and earlier steps registered stays (0.39361ms)
+✔ a plain object initializer is named anonymous initializer, with its position (0.300773ms)
+✔ a promise a strategy returns is awaited, so its rejection stops the load unchanged (1.276277ms)
+✔ an async attach on the event strategy is awaited too (0.379194ms)
+✔ a bare action string binds the event class to the action with no transformer (2.454311ms)
+✔ an action object passes its own transformer (0.436524ms)
+✔ a list of actions binds each one, strings and objects, in order, across every pair (1.065848ms)
+✔ the strategy is resolved once for an initializer with several bindings (0.421406ms)
+✔ an empty list resolves no strategy, so it loads with none bound (0.293509ms)
+✔ bindings with no ActionBindingStrategy bound fail the load with a LoaderException and the container error (0.790379ms)
+✔ a 0.1 { eventId, listener } entry loads as a plain listener on the event strategy, and needs no action strategy (0.724375ms)
+✔ pairs and 0.1 entries in one list each reach their own strategy, in list order (0.463569ms)
+✔ an error the strategy throws, such as its TypeError for a bad event class, passes through unchanged (0.471769ms)
+✔ a malformed answer fails the load with a TypeError and binds nothing from it (1.714555ms)
+✔ test/fixtures.ts (87.339216ms)
+✔ an initializer that binds the event strategy in its record form serves its own listeners and later ones (3.998516ms)
+✔ a 0.1 event with only an instance getId reaches a listener the loader attached by id (0.45943ms)
+✔ a plain function listener hears its event (3.368372ms)
+✔ a list of listeners runs in list order, for each event id (0.571532ms)
+✔ a handler class is resolved from the container and its handle receives the event (0.558573ms)
+✔ a constructor function whose prototype has handle is a handler class too, resolved from the container (0.541785ms)
+✔ a handler class is resolved when the event fires, so it may need a binding a later initializer makes (0.660853ms)
+✔ the handler is not built during load, only when its event fires (0.346027ms)
+✔ broadcast waits for an async handler's handle to settle (20.405583ms)
+✔ a handler that cannot be resolved fails the broadcast, not the load (0.967455ms)
+✔ an error from handle reaches the broadcast unchanged (0.453227ms)
+✔ a function with a prototype but no handle method is a plain listener, called with the event (0.262952ms)
+✔ a plain function is attached itself, by event id, at the default priority (0.329774ms)
+✔ the strategy bound under the 0.1 string token is the one the loader uses (0.243488ms)
+✔ the 0.1 bootstrap option reads the event strategy by the token it names (0.172694ms)
+✔ an attach that throws stops the load unchanged, and the listeners attached before it stay attached (0.21728ms)
+✔ listeners with no event strategy bound fail the load with a LoaderException and the container error (0.187371ms)
+✔ the event strategy is resolved before the record is read, as PHPNomad does, so an empty record with none bound fails the load (0.123691ms)
+✔ a malformed answer fails the load with a TypeError and attaches nothing from it (1.656805ms)
+✔ a false condition skips every step after it, and the container was set before the question (1.458839ms)
+✔ a condition that resolves false skips every step after it (5.654979ms)
+✔ a false condition skips only its own initializer, and the next one loads in full (0.970219ms)
+✔ a true condition, sync or async, runs every step (2.158989ms)
+✔ the condition is asked after setContainer and before the class definitions (0.277652ms)
+✔ an answer that is not a boolean fails the load with a TypeError naming the initializer, and runs no later step (1.190563ms)
+✔ a condition that throws stops the load with its own error, unchanged (0.247448ms)
+✔ one initializer runs every step in PHPNomad order: container, condition, definitions, bindings, listeners, tasks, controllers, load (2.073054ms)
+✔ each initializer finishes every step before the next initializer starts (0.302098ms)
+✔ a later initializer is not bound yet while an earlier one loads (0.253668ms)
+✔ an initializer with only some methods runs only those steps, in the same order (0.224518ms)
+✔ an async load finishes before the next initializer starts (20.519542ms)
+✔ load resolves only after the last initializer has loaded (19.748408ms)
+✔ each initializer receives the bootstrapper container itself (0.258132ms)
+✔ test/loader-type-safety.ts (141.665128ms)
+✔ the package root exports the loader, its errors, its guards and its tokens (1.003833ms)
+✔ isPlainObject accepts object literals and null-prototype objects, and nothing else (1.12444ms)
+✔ isConstructable accepts classes and ES5 constructors, and refuses arrows, async functions and methods (0.265939ms)
+✔ isHandlerClass needs a handle function on the prototype, written as a class or ES5 (0.307265ms)
+✔ isClassSyntax is true only for functions written with class (0.195684ms)
+✔ initializerName is the constructor name, or anonymous initializer for a plain object or a nameless class (0.238647ms)
+✔ describeValue names each kind of value an initializer might answer (0.175914ms)
+✔ a handler class is attached for its task class, and running the task calls its handle with the task (1.605227ms)
+✔ the handler is resolved through the container when the task runs, not during load (0.271172ms)
+✔ a handler may need a binding a later initializer makes (0.454563ms)
+✔ a list of handlers attaches each one, in order, across every pair, with one strategy resolve (0.366817ms)
+✔ the function the strategy runs settles only after the handler's handle settles (20.661836ms)
+✔ a failing handler rejects the function the strategy runs, so the strategy sees the failure (5.898472ms)
+✔ a handler that cannot be resolved rejects the function the strategy runs with the container error unchanged (0.349701ms)
+✔ handlers with no task strategy bound fail the load with a LoaderException and the container error (0.30663ms)
+✔ the task strategy is resolved before the list is read, as PHPNomad does, so an empty list with none bound fails the load (0.163595ms)
+✔ a malformed answer fails the load with a TypeError and attaches nothing from it (1.181404ms)
+ℹ tests 102
+ℹ suites 0
+ℹ pass 100
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 224.750575
+
+✖ failing tests:
+
+test at test/class-definitions.test.ts:146:1
+✖ a pair with no abstract fails the load with a LoaderException whose cause names the step and the concrete, and binds nothing (1.310643ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /getClassDefinitions/. Input:
+  
+  'bind(MemoryStore) needs at least one abstract to bind MemoryStore to.'
+  
+      at Object.<anonymous> (file://<proof-clone>/test/class-definitions.test.ts:154:14)
+      at expectedException (node:assert:547:17)
+      at expectsError (node:assert:672:21)
+      at strict.rejects (node:assert:738:3)
+      at async TestContext.<anonymous> (file://<proof-clone>/test/class-definitions.test.ts:148:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'bind(MemoryStore) needs at least one abstract to bind MemoryStore to.',
+    expected: /getClassDefinitions/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/class-definitions.test.ts:162:1
+✖ a bad abstract on a later pair fails the load with a LoaderException and binds no pair from that answer (0.862646ms)
+  AssertionError [ERR_ASSERTION]: a later pair with no abstract
+      at Object.<anonymous> (file://<proof-clone>/test/class-definitions.test.ts:193:16)
+      at expectedException (node:assert:547:17)
+      at expectsError (node:assert:672:21)
+      at strict.rejects (node:assert:738:3)
+      at async TestContext.<anonymous> (file://<proof-clone>/test/class-definitions.test.ts:188:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'bind(SystemClock) needs at least one abstract to bind SystemClock to.',
+    expected: /getClassDefinitions/,
+    operator: 'match',
+    diff: 'simple'
+  }

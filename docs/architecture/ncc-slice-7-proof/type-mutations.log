@@ -1,0 +1,31 @@
+baseline typecheck exit=0 errors=0 directives=12
+TC1-must-catch: shouldLoad answers anything: KILLED unused=[123] expect=[123] OK
+    unused: shouldLoad answers a boolean
+TC2-must-survive: comment only: SURVIVED expect=survive OK
+TC3-must-refuse: syntax break: REFUSED (other errors: [('src/interfaces.ts', '96', 'TS1005'), ('src/interfaces.ts', '96', 'TS1005')])  expect=refuse
+TI1 the variadic form takes any object: KILLED unused=[112, 115] expect=[112, 115] OK
+    unused: a number is not an initializer
+    unused: an initializer with no loader method is not an initializer
+TI2 the array form takes numbers: KILLED unused=[112] expect=[112] OK
+    unused: a number is not an initializer
+TD1 a concrete may be a string: KILLED unused=[132] expect=[132] OK
+    unused: a concrete is a class, not a string
+TD2 a concrete may be abstract: KILLED unused=[141] expect=[141] OK
+    unused: a concrete is a class the container can construct, not an abstract class
+TL1 the loader declares a loose HasListeners: KILLED unused=[150] expect=[150] OK
+    unused: a listener entry is a handler class or a function
+TT1 a task may be a string: KILLED unused=[159] expect=[159] OK
+    unused: a task is a class with a static getId
+TT2 a task handler needs no handle: KILLED unused=[167] expect=[167] OK
+    unused: a task handler class has a handle method
+TR1 a controller may be a string: KILLED unused=[174] expect=[174] OK
+    unused: a controller is a class
+TO1 load answers anything: KILLED unused=[182] expect=[182] OK
+    unused: load answers nothing, sync or async
+TS1 task attach takes a string: KILLED unused=[193] expect=[193] OK
+    unused: attach takes a task class
+TS2 a route getter may answer the controller: KILLED unused=[195] expect=[195] OK
+    unused: a route getter answers a promise
+restored typecheck exit=0
+directives never left unused: none
+mismatches=0
