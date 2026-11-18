@@ -4,6 +4,10 @@
   "description": "Bootstrapper that runs initializers against a container and an event strategy, the TypeScript counterpart to PHPNomad's loader package",
   "type": "module",
   "license": "MIT",
+  "homepage": "https://github.com/tsnomad/loader#readme",
+  "bugs": {
+    "url": "https://github.com/tsnomad/loader/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tsnomad/loader.git"
@@ -42,23 +46,24 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build",
+    "prepack": "npm run build",
     "pretypecheck": "npm run build",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "pretest": "npm run build",
     "test": "node --test"
   },
   "dependencies": {
-    "@tsnomad/di-container": "github:tsnomad/di-container#feat/node-commerce-connectors",
-    "@tsnomad/event": "github:tsnomad/event#feat/node-commerce-connectors"
+    "@tsnomad/di-container": "^0.2.0",
+    "@tsnomad/event": "^0.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0"
-  },
-  "overrides": {
-    "@tsnomad/di-container": "$@tsnomad/di-container"
   }
 }
